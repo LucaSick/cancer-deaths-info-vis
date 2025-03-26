@@ -1,1 +1,1 @@
-# CancerDeathsInfoVis
+# Cancer Deaths Visualisation
