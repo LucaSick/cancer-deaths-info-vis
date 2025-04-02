@@ -8,7 +8,7 @@ import * as d3 from 'd3'
 const WorldMap = () => {
     const width = 1000;
     const height = 700;
-    const GEOJSON = "/custom_no_antartica.json"
+    const GEOJSON = "/GEOJSON_med_stripped.json"
     const map = d3.select("#worldmap")
         .append("svg")
         .attr("width", width)
@@ -18,11 +18,15 @@ const WorldMap = () => {
         let projection = d3.geoMercator().fitSize([width, height], data)
         let geoGenerator = d3.geoPath()
             .projection(projection); //turn GeoJSON into SVG path
+        const populationDomain = d3.extent(data.features, (d) => d.properties.name.length)
+        const colorScale = d3.scaleSequential(d3.interpolateViridis).domain(populationDomain)
         let countryNodes = map
             .selectAll('path')
             .data(data.features)
             .join('path')
-            .attr('d', geoGenerator);
+            .attr('d', geoGenerator)
+            .style('fill', (d) => colorScale(d.properties.name.length))
+            .classed("Country_map", true)
     }
     ).catch((error) => {
         console.error("Something went wrong loading the data: ", error);
