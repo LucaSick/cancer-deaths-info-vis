@@ -99,8 +99,3 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
-
-.Country_map {
-  stroke: white;
-  stroke-width: 1px;
-}

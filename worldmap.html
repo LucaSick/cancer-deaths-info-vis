@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="/cancer-logo.jpg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cancer Deaths Visualisation</title>
+</head>
+
+<body>
+    <div id="navbar"></div>
+    <div id="view_container">
+        <div id="filter_container">
+            <div class="filter_group">
+                <label>
+                    <span class="filter_label">Cancer type:</span>
+                    <select id="cancerSelect">
+                    </select>
+                </label>
+            </div>
+            <div class="filter_group">
+                <label>
+                    <span class="filter_label">Sex:</span>
+                    <div class="btnFilterGroup" id="sexToggle">
+                        <button class="filter-btn" data-value="both">Both</button>
+                        <button class="filter-btn" data-value="male">Male</button>
+                        <button class="filter-btn" data-value="female">Female</button>
+                    </div>
+                </label>
+            </div>
+            <div class="filter_group">
+                <label>
+                    <span class="filter_label">Year:</span>
+                    <select id="yearSelect">
+                    </select>
+                </label>
+            </div>
+            <div class="filter_group">
+                <label>
+                    <span class="filter_label">Age:</span>
+                    <select id="ageSelect">
+                    </select>
+                </label>
+            </div>
+            <div class="filter_group">
+                <label>
+                    <span class="filter_label">Display type:</span>
+                    <div class="btnFilterGroup" id="displayToggle">
+                        <button class="filter-btn" data-value="Rate">Rate</button>
+                        <button class="filter-btn" data-value="Number">Number</button>
+                        <button class="filter-btn" data-value="Percent">Percent</button>
+
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div id="world_container"></div>
+    </div>
+    <script type="module" src="/src/graphs/worldmap.js"></script>
+</body>
+
+</html>

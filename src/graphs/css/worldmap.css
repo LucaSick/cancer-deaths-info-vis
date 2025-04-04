@@ -1,0 +1,75 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#view_container {
+    flex: 1;
+    /* take all remaining space */
+    display: flex;
+
+}
+
+#filter_container {
+    width: 25%;
+    height: 100%;
+}
+
+#world_container {
+    background-color: #f8f8f8;
+    flex: 1;
+    position: relative;
+}
+
+#worldmap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+
+.Country_map {
+    stroke: white;
+    stroke-width: 1px;
+}
+
+.btnFilterGroup {
+    display: inline-flex;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    background: #f8f8f8;
+    border-right: 1px solid #ccc;
+    border-radius: 0px;
+    cursor: pointer;
+
+}
+
+.filter-btn:last-child {
+    border-right: none;
+}
+
+.filter-btn.active {
+    background-color: #4CAF50;
+    /* Green */
+    color: white;
+}
+
+.filter_group {
+    padding: 15px
+}
