@@ -206,7 +206,7 @@ const UpdateView = () => {
                 const estimate = (+data[metric]).toFixed(2) || "N/A";
                 const upper = (+data[`${properties.view_type}_upper`]).toFixed(2) || "N/A";
                 const lower = (+data[`${properties.view_type}_lower`]).toFixed(2) || "N/A";
-                return `${name} (${year})\n${cancer} - ${age}\n${properties.view_type}:\nLower: ${lower}\nEstimate: ${estimate}\nUpper: ${upper}`;
+                return `${name} (${year})\n${cancer} - ${age}\n${properties.view_type}\nLower: ${lower}\nEstimate: ${estimate}\nUpper: ${upper}`;
             }
             return d.properties.name;
         });
@@ -340,7 +340,7 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
             const estimate = (+d[metric]).toFixed(2) || "N/A";
             const upper = (+d[`${properties.view_type}_upper`]).toFixed(2) || "N/A";
             const lower = (+d[`${properties.view_type}_lower`]).toFixed(2) || "N/A";
-            return `${name}\nLower: ${lower}\nEstimate: ${estimate}\nUpper: ${upper}`;
+            return `${name}\n${lower}\nEstimate: ${estimate}\nUpper: ${upper}`;
         });
 }
 

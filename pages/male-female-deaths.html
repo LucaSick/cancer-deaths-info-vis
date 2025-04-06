@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="/cancer-logo.jpg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cancer Deaths Visualisation</title>
+</head>
+
+<body>
+    <h1>Cancer Deaths Visualisation</h1>
+    <label for="cause-select">Cause:</label>
+    <select id="cause-select"></select>
+
+    <label for="location-select">Location:</label>
+    <select id="location-select"></select>
+
+    <label for="age-select">Age Group:</label>
+    <select id="age-select"></select>
+
+    <button id="apply-filters">Apply Filters</button>
+    <div id="app"></div>
+    <script type="module" src="/src/graphs/male-female-deaths.js"></script>
+</body>
+
+</html>
