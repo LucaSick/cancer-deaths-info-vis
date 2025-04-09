@@ -1,0 +1,78 @@
+/* styles.css */
+
+.filter-panel {
+    max-width: 600px;
+    margin-bottom: 20px;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: sans-serif;
+    background-color: #fafafa;
+}
+
+.filter-group {
+    margin-bottom: 16px;
+}
+
+.filter-group label,
+.filter-group span {
+    display: inline-block;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.range-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.range-wrapper input[type="range"] {
+    flex: 1;
+    min-width: 120px;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.checkbox-group label {
+    font-weight: normal;
+    background: #f0f0f0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#countryFilter {
+    width: 100%;
+    padding: 4px;
+}
+
+#apply-filters {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#apply-filters:hover {
+    background-color: #0056b3;
+}
+
+#tooltip {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 8px;
+    font-size: 12px;
+    pointer-events: none;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

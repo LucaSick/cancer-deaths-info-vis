@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/graphs/css/country-stats.css">
     <link rel="icon" type="image/jpeg" href="/cancer-logo.jpg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Country Specific Statistics</title>
@@ -10,25 +11,36 @@
 
 <body>
     <h1>Country Specific Statistics</h1>
-    <div>
-        <label for="year">Year:</label>
-        <select id="yearFilter"></select>
+    <div style="display: flex; flex-direction: row;">
+        <div>
+            <div class="filter-panel">
+                <div class="filter-group">
+                    <span>Year range:</span>
+                    <div class="range-wrapper">
+                        <span>From <strong id="yearMinValue">2000</strong></span>
+                        <input type="range" id="yearRangeMin" min="2000" max="2024" step="1">
+                        <span>To <strong id="yearMaxValue">2024</strong></span>
+                        <input type="range" id="yearRangeMax" min="2000" max="2024" step="1">
+                    </div>
+                </div>
 
-        <input type="range" id="yearRangeMin" min="2000" max="2024" step="1">
-        <span id="yearMinValue">2000</span>
-        <span>to</span>
-        <input type="range" id="yearRangeMax" min="2000" max="2024" step="1">
-        <span id="yearMaxValue">2024</span>
+                <div class="filter-group">
+                    <label for="countryFilter">Location:</label><br>
+                    <select id="countryFilter" style="width: 100%; padding: 4px;"></select>
+                </div>
 
-        <label for="countryFilter">Location:</label>
-        <select id="countryFilter"></select>
+                <div class="filter-group">
+                    <label>Age Group:</label>
+                    <div id="ageFilter" class="checkbox-group"></div>
+                </div>
 
-        <label for="ageFilter">Age Group:</label>
-        <select id="ageFilter"></select>
-        <button id="apply-filters">Load & Render</button>
-        <div id="tooltip" style="position: absolute; background: white; border: 1px solid #ccc; padding: 8px; font-size: 12px; pointer-events: none; display: none;"></div>
+                <button id="apply-filters">Load & Render</button>
+            </div>
+
+            <div id="tooltip"></div>
+        </div>
+        <svg id="chart" width="800" height="500"></svg>
     </div>
-    <svg id="chart" width="800" height="500"></svg>
     <script type="module" src="/src/graphs/country-stats.js"></script>
 </body>
 

@@ -2,12 +2,10 @@ import * as d3 from 'd3'
 
 import FilterValues from "../Utils/filterValues";
 
-console.log(FilterValues.countries);
-
 const populateFilters = () => {
-    const yearOptions = [""].concat(FilterValues.years);
+    const yearOptions = FilterValues.years;
     const locationOptions = FilterValues.countries;
-    const ageOptions = FilterValues.ages;
+    const ageOptions = FilterValues.ages.slice(0, -1);
 
     const populateSelect = (id, options) => {
         const select = document.getElementById(id);
@@ -15,19 +13,62 @@ const populateFilters = () => {
             options.map(opt => `<option value="${opt}">${opt || 'All'}</option>`).join("");
     };
 
-    populateSelect("yearFilter", yearOptions);
+    const populateCheckboxGroup = (id, options) => {
+      const container = document.getElementById(id);
+      container.innerHTML = options.map(opt => `
+          <label>
+              <input type="checkbox" value="${opt}" />
+              ${opt}
+          </label>
+      `).join("");
+  };
+
+    // populateSelect("yearFilter", yearOptions);
     populateSelect("countryFilter", locationOptions);
-    populateSelect("ageFilter", ageOptions);
+    populateCheckboxGroup("ageFilter", ageOptions);
+
+    const minYear = Math.min(...yearOptions);
+    const maxYear = Math.max(...yearOptions);
+
+    const yearMinSlider = document.getElementById("yearRangeMin");
+    const yearMaxSlider = document.getElementById("yearRangeMax");
+    const yearMinValue = document.getElementById("yearMinValue");
+    const yearMaxValue = document.getElementById("yearMaxValue");
+
+    yearMinSlider.min = minYear;
+    yearMinSlider.max = maxYear;
+    yearMinSlider.value = minYear;
+
+    yearMaxSlider.min = minYear;
+    yearMaxSlider.max = maxYear;
+    yearMaxSlider.value = maxYear;
+
+    const updateYearValues = () => {
+        let min = parseInt(yearMinSlider.value);
+        let max = parseInt(yearMaxSlider.value);
+
+        // Prevent overlap
+        if (min > max) {
+            [min, max] = [max, min];
+        }
+
+        yearMinValue.textContent = min;
+        yearMaxValue.textContent = max;
+    };
+
+    yearMinSlider.addEventListener("input", updateYearValues);
+    yearMaxSlider.addEventListener("input", updateYearValues);
+
+    updateYearValues();
 }
 
 populateFilters()
 
-const loadAndRender = async (country, year, age) => {
+const loadAndRender = async (country, yearMin, yearMax, ages) => {
     const data = await d3.csv(`/country-stats/country-stats-${country}.csv`, d3.autoType);
-    console.log(age);
     // Optional filter
     const filtered = data.filter(d => {
-        return (!year || d.year == year) && (!age || age == "All ages" || d.age_name == age);
+        return (d.year <= yearMax && d.year >= yearMin) && (ages.length === 0 || ages.includes(d.age_name));
     });
 
     // Group by cause_name and sum val
@@ -97,10 +138,24 @@ function renderChart(data) {
       });
 }
 
-document.getElementById("apply-filters").addEventListener("click", () => {
-    const country = document.getElementById("countryFilter").value;
-    const year = document.getElementById("yearFilter").value;
-    const age = document.getElementById("ageFilter").value;
+const getSelectedAges = () => {
+  return Array.from(document.querySelectorAll('#ageFilter input[type="checkbox"]:checked'))
+      .map(checkbox => checkbox.value);
+};
 
-    loadAndRender(country, year, age);
+function runLoadAndRender() {
+  const country = document.getElementById("countryFilter").value;
+    const yearMinValue = document.getElementById("yearMinValue");
+    const yearMaxValue = document.getElementById("yearMaxValue");
+    const ages = getSelectedAges();
+
+    console.log(parseInt(yearMinValue.textContent));
+
+    loadAndRender(country, parseInt(yearMinValue.textContent), parseInt(yearMaxValue.textContent), ages);
+}
+
+document.getElementById("apply-filters").addEventListener("click", () => {
+  runLoadAndRender()
 });
+
+runLoadAndRender()
