@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/jpeg" href="/cancer-logo.jpg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Country Specific Statistics</title>
+</head>
+
+<body>
+    <h1>Country Specific Statistics</h1>
+    <div>
+        <label for="year">Year:</label>
+        <select id="yearFilter"></select>
+
+        <input type="range" id="yearRangeMin" min="2000" max="2024" step="1">
+        <span id="yearMinValue">2000</span>
+        <span>to</span>
+        <input type="range" id="yearRangeMax" min="2000" max="2024" step="1">
+        <span id="yearMaxValue">2024</span>
+
+        <label for="countryFilter">Location:</label>
+        <select id="countryFilter"></select>
+
+        <label for="ageFilter">Age Group:</label>
+        <select id="ageFilter"></select>
+        <button id="apply-filters">Load & Render</button>
+        <div id="tooltip" style="position: absolute; background: white; border: 1px solid #ccc; padding: 8px; font-size: 12px; pointer-events: none; display: none;"></div>
+    </div>
+    <svg id="chart" width="800" height="500"></svg>
+    <script type="module" src="/src/graphs/country-stats.js"></script>
+</body>
+
+</html>
