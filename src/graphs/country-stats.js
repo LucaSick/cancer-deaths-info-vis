@@ -5,7 +5,8 @@ import FilterValues from "../Utils/filterValues";
 const populateFilters = () => {
     const yearOptions = FilterValues.years;
     const locationOptions = FilterValues.countries;
-    const ageOptions = FilterValues.ages.slice(0, -1);
+    const ageOptions = FilterValues.ages.slice(1, -1);
+    const causeOptions = FilterValues.cause_names;
 
     const populateSelect = (id, options) => {
         const select = document.getElementById(id);
@@ -25,6 +26,7 @@ const populateFilters = () => {
 
     // populateSelect("yearFilter", yearOptions);
     populateSelect("countryFilter", locationOptions);
+    populateCheckboxGroup("causeFilter", causeOptions);
     populateCheckboxGroup("ageFilter", ageOptions);
 
     const minYear = Math.min(...yearOptions);
@@ -64,11 +66,13 @@ const populateFilters = () => {
 
 populateFilters()
 
-const loadAndRender = async (country, yearMin, yearMax, ages) => {
+const loadAndRender = async (country, yearMin, yearMax, ages, causes) => {
     const data = await d3.csv(`/country-stats/country-stats-${country}.csv`, d3.autoType);
     // Optional filter
     const filtered = data.filter(d => {
-        return (d.year <= yearMax && d.year >= yearMin) && (ages.length === 0 || ages.includes(d.age_name));
+        return (d.year <= yearMax && d.year >= yearMin)
+                && (ages.length === 0 || ages.includes(d.age_name))
+                && (causes.length === 0 || causes.includes(d.cause_name));
     });
 
     // Group by cause_name and sum val
@@ -91,7 +95,7 @@ function renderChart(data) {
 
     const width = +svg.attr("width");
     const height = +svg.attr("height");
-    const margin = { top: 40, right: 20, bottom: 100, left: 80 };
+    const margin = { top: 40, right: 100, bottom: 40, left: 60 };
 
     const x = d3.scaleBand()
       .domain(data.map(d => d[0]))
@@ -138,17 +142,12 @@ function renderChart(data) {
       });
 }
 
-const getSelectedAges = () => {
-  return Array.from(document.querySelectorAll('#ageFilter input[type="checkbox"]:checked'))
-      .map(checkbox => checkbox.value);
-};
-
-const drawMaleFemaleDeathsGraph = (locationName, ages, causeName, yearMin, yearMax) => {
+const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax) => {
   d3.select("#app").select("svg").remove();
 
   const margin = { top: 40, right: 100, bottom: 40, left: 60 };
-  const width = 1000 - margin.left - margin.right;
-  const height = 600 - margin.top - margin.bottom;
+  const width = 800 - margin.left - margin.right;
+  const height = 500 - margin.top - margin.bottom;
 
   const svg = d3.select("#app")
       .append("svg")
@@ -167,8 +166,9 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causeName, yearMin, yearM
     .style("pointer-events", "none");
 
   let fileName = "/male-female-deaths/male-females-deaths.csv";
-  if (causeName) {
-      fileName = `/male-female-deaths/male-females-deaths-${causeName}.csv`
+
+  if (causes.length) {
+      fileName = `/male-female-deaths/male-females-deaths-causes.csv`
   }
 
   d3.csv(fileName, d => ({
@@ -177,7 +177,7 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causeName, yearMin, yearM
       val: +d.val,
       location_name: d.location_name,
       age_name: d.age_name,
-      cause_name: causeName,
+      cause_name: d.cause_name,
   })).then(rawData => {
       let filteredData = rawData;
 
@@ -187,6 +187,10 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causeName, yearMin, yearM
 
       if (ages.length) {
           filteredData = filteredData.filter(d => ages.includes(d.age_name));
+      }
+
+      if (causes.length) {
+          filteredData = filteredData.filter(d => causes.includes(d.cause_name));
       }
 
       if (yearMax && yearMin) {
@@ -286,7 +290,7 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causeName, yearMin, yearM
               .attr("fill", color(sex_name))
               .on("mouseover", (event, d) => {
                   tooltip.transition().duration(100).style("display", "block");
-                  tooltip.html(`<strong>${d.sex_name}</strong><br>Year: ${d.year}<br>Deaths: ${d.val.toFixed(2)}<br>Cause: ${causeName || 'All causes'}`)
+                  tooltip.html(`<strong>${d.sex_name}</strong><br>Year: ${d.year}<br>Deaths: ${d.val.toFixed(2)}`)
                       .style("left", `${event.pageX + 10}px`)
                       .style("top", `${event.pageY - 28}px`);
               })
@@ -297,16 +301,27 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causeName, yearMin, yearM
   });
 }
 
+const getSelected = (id) => {
+  return Array.from(document.querySelectorAll(`#${id} input[type="checkbox"]:checked`))
+      .map(checkbox => checkbox.value);
+};
+
+// const getSelectedCauses = () => {
+//   return Array.from(document.querySelectorAll('#causeFilter input[type="checkbox"]:checked'))
+//       .map(checkbox => checkbox.value);
+// };
+
 function runLoadAndRender() {
     const country = document.getElementById("countryFilter").value;
     const yearMinValue = document.getElementById("yearMinValue");
     const yearMaxValue = document.getElementById("yearMaxValue");
-    const ages = getSelectedAges();
+    const ages = getSelected("ageFilter");
+    const causes = getSelected("causeFilter");
 
     console.log(parseInt(yearMinValue.textContent));
 
-    loadAndRender(country, parseInt(yearMinValue.textContent), parseInt(yearMaxValue.textContent), ages);
-    drawMaleFemaleDeathsGraph(country, ages, undefined, parseInt(yearMinValue.textContent), parseInt(yearMaxValue.textContent));
+    loadAndRender(country, parseInt(yearMinValue.textContent), parseInt(yearMaxValue.textContent), ages, causes);
+    drawMaleFemaleDeathsGraph(country, ages, causes, parseInt(yearMinValue.textContent), parseInt(yearMaxValue.textContent));
 }
 
 document.getElementById("apply-filters").addEventListener("click", () => {

@@ -34,10 +34,18 @@
                     <div id="ageFilter" class="checkbox-group"></div>
                 </div>
 
+                <div class="filter-group">
+                    <label>Causes Group:</label>
+                    <div id="causeFilter" class="checkbox-group"></div>
+                </div>
+
                 <button id="apply-filters">Load & Render</button>
             </div>
         </div>
-        <svg id="chart" width="800" height="500"></svg>
+        <div>
+            <svg id="chart" width="800" height="500"></svg>
+            <div id="app"></div>
+        </div>
         <div id="tooltip"
             style="
                 position: absolute;
@@ -51,7 +59,6 @@
             ">
         </div>
     </div>
-    <div id="app"></div>
     <script type="module" src="/src/graphs/country-stats.js"></script>
 </body>
 
