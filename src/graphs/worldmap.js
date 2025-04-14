@@ -497,10 +497,9 @@ const showCountryBox = (countryName) => {
 }
 
 document.getElementById("map_container").addEventListener("click", (event) => {
-    // If clicked directly on the background (not a country)
     console.log(event.target)
     if (!event.target.classList.contains("Country_map") && !event.target.classList.contains("dot_of_legend")) {
-        clearSelectedCountry(); // Hide tooltip, remove highlight
+        clearSelectedCountry(); // Hide tooltip
     }
 });
 //Filter events
@@ -574,5 +573,8 @@ document.getElementById("countrySelect").addEventListener("change", (e) => {
 });
 document.getElementById("detailsNavBtn").addEventListener("click", () => {
     const country = document.getElementById("selectedCountryName").textContent;
-    window.location.href = "/pages/country-stats.html?country=" + encodeURIComponent(country); // or any URL you want
+    window.location.href = "/pages/country-stats.html?country=" + encodeURIComponent(country);
+});
+document.getElementById("countryClose").addEventListener("click", () => {
+    clearSelectedCountry();
 });
