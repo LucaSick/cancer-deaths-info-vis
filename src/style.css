@@ -103,3 +103,42 @@ button:focus-visible {
 #navbar {
   height: 50px
 }
+
+#navbar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: pink;
+  height: 50px;
+
+}
+
+#navbar .navlogo {
+  /* optional spacing */
+  padding-left: 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  /* ✅ Vertically center the contents like <img> or <a> */
+}
+
+#navbar li {
+  float: left;
+}
+
+#navbar li a {
+  display: block;
+  color: black;
+  text-align: center;
+  padding: 12px 12px;
+  text-decoration: none;
+}
+
+#navbar li a:hover:not(.active) {
+  opacity: 0.3;
+}
+
+#navbar .active {
+  text-decoration: underline;
+}
