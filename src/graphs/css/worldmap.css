@@ -82,6 +82,19 @@ body {
     font-size: 18px;
 }
 
+#CountryFooter {
+    text-align: right;
+}
+
+#closeCountry {
+    text-align: right;
+}
+
+#detailsNavBtn {
+    border: 1px solid #ccc;
+    ;
+}
+
 svg {
     display: block;
     width: 100%;
