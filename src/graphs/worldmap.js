@@ -572,3 +572,7 @@ document.getElementById("countrySelect").addEventListener("change", (e) => {
     showCountryBox(value)
     // handleChange("age_group", value);
 });
+document.getElementById("detailsNavBtn").addEventListener("click", () => {
+    const country = document.getElementById("selectedCountryName").textContent;
+    window.location.href = "/pages/country-stats.html?country=" + encodeURIComponent(country); // or any URL you want
+});
