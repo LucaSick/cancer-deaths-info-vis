@@ -3,6 +3,7 @@ import '../style.css'
 import './css/worldmap.css'
 import LocalstorageProperties from '../Utils/localstorageProperties';
 import FilterValues from '../Utils/filterValues';
+import createLoadNavbar from '../Utils/createNavbar';
 //Geodata generated from https://geojson-maps.kyd.au/ also take a look at TopoJSON 
 // tutorial followed https://technology.amis.nl/frontend/web-html5-css3/create-interactive-world-map-to-visualize-country-data/
 //https://technology.amis.nl/frontend/world-map-data-visualization-with-d3-js-geojson-and-svg-zooming-and-panning-and-dragging/
@@ -29,6 +30,7 @@ const legendLabel = {
     "Number": "Number of deaths"
 }
 
+createLoadNavbar("Worldmap")
 //GET the GEOJSONDATA
 d3.json(GEOJSON).then(data => {
     geoData = data;
@@ -105,13 +107,13 @@ const populateFilters = () => {
 
 //Function to draw the map
 const CreateMapSVG = () => {
-    const container = document.getElementById("world_container");
+    const container = document.getElementById("map_container");
     container.style.height = `${container.clientHeight}px`;
     width = container.clientWidth;
     height = container.clientHeight;
     mapHeight = height - titleHeight - globalHeight - legendHeight - padding;
-    d3.select("#world_container").select("svg").remove();
-    worldmap = d3.select("#world_container")
+    d3.select("#map_container").select("svg").remove();
+    worldmap = d3.select("#map_container")
         .append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -156,6 +158,9 @@ const redrawMap = () => {
         .attr('d', geoGenerator)
         .attr("data-country", d => d.properties.name)
         .classed("Country_map", true)
+        .on("click", (event, d) => {
+            showCountryBox(d.properties.name)
+        })
     //.classed("Monaco", d => d.properties.name === "Monaco")
     UpdateView()
 }
@@ -194,7 +199,7 @@ const UpdateView = () => {
     d3.selectAll(".Country_map")
         .select("title").remove(); // remove old titles if they exist
 
-    d3.selectAll(".Country_map")
+    /*d3.selectAll(".Country_map")
         .append("title")
         .text(d => {
             const data = dataMap.get(d.properties.name);
@@ -209,7 +214,7 @@ const UpdateView = () => {
                 return `${name} (${year})\n${cancer} - ${age}\n${properties.view_type}\nLower: ${lower}\nEstimate: ${estimate}\nUpper: ${upper}`;
             }
             return d.properties.name;
-        });
+        });*/
     createLegend(populationDomain, colorScale, metric, properties)
 }
 
@@ -331,8 +336,10 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
         //.style("opacity", 0.5)
         .style("stroke", "#000")
         .style("stroke-width", 0.5)
+        .classed("dot_of_legend", true)
         .on("click", (event, d) => {
             zoomToACountry(d.geo_location_name);
+            showCountryBox(d.geo_location_name);
         })
         .append("title")
         .text(d => {
@@ -426,6 +433,8 @@ const clearSelectedCountry = () => {
         d3.selectAll(".Country_map").classed("Focus", false);
         document.getElementById("countrySelect").value = "";
     }
+    d3.selectAll(".Country_map").classed("Focus", false);
+    document.getElementById("country-box").style.display = "none";
 };
 const resetZoom = () => {
     const transform = d3.zoomIdentity
@@ -457,6 +466,43 @@ document.getElementById("resetZoomBtn").addEventListener("click", (e) => {
     resetZoom()
 });
 
+const showCountryBox = (countryName) => {
+    console.log(countryName)
+    const data = dataMap.get(countryName);
+    if (data) {
+        console.log(data)
+        const properties = LocalstorageProperties.getProperties(storageKey)
+        const name = data.location_name;
+        const year = data.year;
+        const cancer = data.cause_name;
+        const age = data.age_name;
+        const estimate = (+data[`${properties.view_type}_val`]).toFixed(2) || "N/A";
+        const upper = (+data[`${properties.view_type}_upper`]).toFixed(2) || "N/A";
+        const lower = (+data[`${properties.view_type}_lower`]).toFixed(2) || "N/A";
+        document.getElementById("selectedCountryName").textContent = name;
+        document.getElementById("selectedYear").textContent = year;
+        document.getElementById("lowerValue").textContent = lower;
+        document.getElementById("estimateValue").textContent = estimate;
+        document.getElementById("UpperValue").textContent = upper;
+        document.getElementById("typeData").textContent = cancer;
+        document.getElementById("agesData").textContent = age;
+        document.getElementById("country-box").style.display = "block";
+        d3.selectAll(".Country_map").classed("Focus", false);
+        console.log(d3.selectAll(`.Country_map[data-country="${countryName}"]`))
+        d3.selectAll(`.Country_map[data-country="${countryName}"]`)
+            .classed("Focus", true).raise();
+    }
+
+
+}
+
+document.getElementById("map_container").addEventListener("click", (event) => {
+    // If clicked directly on the background (not a country)
+    console.log(event.target)
+    if (!event.target.classList.contains("Country_map") && !event.target.classList.contains("dot_of_legend")) {
+        clearSelectedCountry(); // Hide tooltip, remove highlight
+    }
+});
 //Filter events
 
 // --- Cancer type ---
@@ -523,5 +569,6 @@ displayButtons.forEach(btn => {
 document.getElementById("countrySelect").addEventListener("change", (e) => {
     const value = e.target.value;
     zoomToACountry(value)
+    showCountryBox(value)
     // handleChange("age_group", value);
 });
