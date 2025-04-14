@@ -89,6 +89,24 @@ const drawMaleFemaleDeathsGraph = (locationName, ageName, causeName) => {
                 })).sort((a, b) => a.year - b.year)
             })
         );
+
+        const totalByYear = Array.from(
+            d3.rollup(
+                filteredData,
+                v => d3.sum(v, d => d.val),
+                d => d.year
+            ),
+            ([year, val]) => ({
+                sex_name: "Total",
+                year: +year,
+                val
+            })
+        ).sort((a, b) => a.year - b.year);
+
+        groupedData.push({
+            sex_name: "Total",
+            values: totalByYear
+        });
     
         // Step 2: Flatten all data to compute x/y scales
         const allPoints = groupedData.flatMap(d => d.values);

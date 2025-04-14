@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/graphs/css/country-stats.css">
+    <link rel="icon" type="image/jpeg" href="/cancer-logo.jpg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Country Specific Statistics</title>
+</head>
+
+<body>
+    <h1>Country Specific Statistics</h1>
+    <div style="display: flex; flex-direction: row;">
+        <div>
+            <div class="filter-panel">
+                <div class="filter-group">
+                    <span>Year range:</span>
+                    <div class="range-wrapper">
+                        <span>From <strong id="yearMinValue">1980</strong></span>
+                        <input type="range" id="yearRangeMin" min="1980" max="2021" step="1">
+                        <span>To <strong id="yearMaxValue">2021</strong></span>
+                        <input type="range" id="yearRangeMax" min="1980" max="2021" step="1">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="countryFilter">Location:</label><br>
+                    <select id="countryFilter" style="width: 100%; padding: 4px;"></select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Age Group:</label>
+                    <div id="ageFilter" class="checkbox-group"></div>
+                </div>
+
+                <div class="filter-group">
+                    <label>Causes Group:</label>
+                    <div id="causeFilter" class="checkbox-group"></div>
+                </div>
+
+                <button id="apply-filters">Load & Render</button>
+            </div>
+        </div>
+        <div>
+            <h3 style="padding-bottom: 0%; margin-bottom: 0%;">Most deadly cancer types</h3>
+            <svg id="chart" width="800" height="500"></svg>
+            <h3 style="padding-bottom: 0%; margin-bottom: 0%;">Total cancer deaths per year</h3>
+            <div id="app"></div>
+        </div>
+        <div id="tooltip"
+            style="
+                position: absolute;
+                background: white;
+                border: 1px solid #ccc;
+                padding: 6px 10px;
+                border-radius: 4px;
+                pointer-events: none;
+                font-size: 13px;
+                z-index: 1000;
+            ">
+        </div>
+    </div>
+    <script type="module" src="/src/graphs/country-stats.js"></script>
+</body>
+
+</html>
