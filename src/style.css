@@ -115,12 +115,12 @@ button:focus-visible {
 }
 
 #navbar .navlogo {
-  /* optional spacing */
+
   padding-left: 10px;
   height: 100%;
   display: flex;
   align-items: center;
-  /* ✅ Vertically center the contents like <img> or <a> */
+
 }
 
 #navbar li {
