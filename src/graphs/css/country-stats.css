@@ -1,13 +1,24 @@
-/* styles.css */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-family: sans-serif;
+    background-color: #ffffff;
+    color: #222;
+}
 
 .filter-panel {
     max-width: 600px;
     margin-bottom: 20px;
     padding: 16px;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     border-radius: 8px;
     font-family: sans-serif;
-    background-color: #fafafa;
+    background-color: #ffffff;
+    color: #333;
 }
 
 .filter-group {
@@ -19,6 +30,7 @@
     display: inline-block;
     font-weight: bold;
     margin-bottom: 4px;
+    color: #222;
 }
 
 .range-wrapper {
@@ -41,38 +53,50 @@
 
 .checkbox-group label {
     font-weight: normal;
-    background: #f0f0f0;
-    padding: 4px 8px;
+    background: #e0e0e0;
+    color: #111;
+    padding: 6px 10px;
     border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.checkbox-group label:hover {
+    background: #d0d0d0;
 }
 
 #countryFilter {
     width: 100%;
-    padding: 4px;
+    padding: 6px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    color: #222;
 }
 
 #apply-filters {
-    padding: 8px 16px;
-    background-color: #007bff;
+    padding: 10px 18px;
+    background-color: #1a73e8;
     color: white;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
+    transition: background-color 0.2s ease;
 }
 
 #apply-filters:hover {
-    background-color: #0056b3;
+    background-color: #155ab6;
 }
 
 #tooltip {
     position: absolute;
-    background: white;
-    border: 1px solid #ccc;
+    background: #ffffff;
+    color: #222;
+    border: 1px solid #bbb;
     padding: 8px;
-    font-size: 12px;
+    font-size: 13px;
     pointer-events: none;
     display: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }

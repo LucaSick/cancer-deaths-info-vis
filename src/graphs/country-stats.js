@@ -101,7 +101,7 @@ function renderChart(data) {
 
     const width = +svg.attr("width");
     const height = +svg.attr("height");
-    const margin = { top: 40, right: 100, bottom: 40, left: 60 };
+    const margin = { top: 40, right: 100, bottom: 150, left: 60 };
 
     const x = d3.scaleBand()
         .domain(data.map(d => d[0]))
@@ -137,7 +137,7 @@ function renderChart(data) {
         .attr("fill", "steelblue")
         .on("mouseover", function (event, d) {
             tooltip.style("display", "block")
-                .html(`<strong>${d[0]}</strong><br/>Value: ${d[1].toLocaleString()}`)
+                .html(`<strong>${d[0]}</strong><br/>Deaths: ${d[1].toLocaleString()}`)
                 .style("left", `${event.pageX + 10}px`)
                 .style("top", `${event.pageY - 28}px`);
             d3.select(this).attr("fill", "darkorange");
@@ -153,7 +153,7 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
 
     const margin = { top: 40, right: 100, bottom: 40, left: 60 };
     const width = 800 - margin.left - margin.right;
-    const height = 500 - margin.top - margin.bottom;
+    const height = 600 - margin.top - margin.bottom;
 
     const svg = d3.select("#app")
         .append("svg")
