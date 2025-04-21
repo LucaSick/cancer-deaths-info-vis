@@ -168,9 +168,11 @@ const redrawMap = () => {
 const loadCSV = () => {
     const properties = LocalstorageProperties.getProperties(storageKey)
     const path = getCSVName(properties)
+    console.log(path)
     d3.csv(path).then(csvData => {
         rawCSVData = csvData;
         updateMapFromCSV()
+        changeCountryBoxData()
     }
     );
 }
@@ -220,8 +222,10 @@ const UpdateView = () => {
 
 
 const createTitle = (properties) => {
+
     titleGroup.selectAll("*").remove();
     globalGroup.selectAll("*").remove();
+
     titleGroup.append("text")
         .attr("x", width / 2) // center it
         .attr("y", 0) // some spacing below the axis
@@ -265,15 +269,15 @@ const createTitle = (properties) => {
     lower.append("tspan")
         .attr("dy", 0)
         .style("font-weight", "normal")
-        .text((+globaleData[`${properties.view_type}_lower`]).toFixed(2));
+        .text((properties.view_type == "Percent" ? (+globaleData[`${properties.view_type}_lower`]) * 100 : (+globaleData[`${properties.view_type}_lower`])).toFixed(2));
     estimate.append("tspan")
         .attr("dy", 0)
         .style("font-weight", "normal")
-        .text((+globaleData[`${properties.view_type}_val`]).toFixed(2));
+        .text((properties.view_type == "Percent" ? (+globaleData[`${properties.view_type}_val`]) * 100 : (+globaleData[`${properties.view_type}_val`])).toFixed(2));
     upper.append("tspan")
         .attr("dy", 0)
         .style("font-weight", "normal")
-        .text((+globaleData[`${properties.view_type}_upper`]).toFixed(2));
+        .text((properties.view_type == "Percent" ? (+globaleData[`${properties.view_type}_upper`]) * 100 : (+globaleData[`${properties.view_type}_upper`])).toFixed(2));
 }
 const createLegend = (populationDomain, colorScale, metric, properties) => {
     legendGroup.selectAll("*").remove();
@@ -344,10 +348,10 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
         .append("title")
         .text(d => {
             const name = d.location_name;
-            const estimate = (+d[metric]).toFixed(2) || "N/A";
-            const upper = (+d[`${properties.view_type}_upper`]).toFixed(2) || "N/A";
-            const lower = (+d[`${properties.view_type}_lower`]).toFixed(2) || "N/A";
-            return `${name}\n${lower}\nEstimate: ${estimate}\nUpper: ${upper}`;
+            const estimate = (properties.view_type == "Percent" ? (+d[metric]) * 100 : (+d[metric])).toFixed(2) || "N/A";
+            const upper = (properties.view_type == "Percent" ? (+d[`${properties.view_type}_upper`]) * 100 : (+d[`${properties.view_type}_upper`])).toFixed(2) || "N/A";
+            const lower = (properties.view_type == "Percent" ? (+d[`${properties.view_type}_lower`]) * 100 : (+d[`${properties.view_type}_lower`])).toFixed(2) || "N/A";
+            return `${name}\nLower: ${lower}\nEstimate: ${estimate}\nUpper: ${upper}`;
         });
 }
 
@@ -368,10 +372,10 @@ const filterCSVData = (data) => {
 
 //Create the path to the right csv file
 const getCSVName = (properties) => {
-    let cancer = properties.cause_name?.replace(" ", "_").replace("/", "-").toLowerCase()
+    let cancer = properties.cause_name?.replaceAll(" ", "_").replaceAll("/", "-").toLowerCase()
     let sex = properties.sex
     let year = properties.year
-    return `/worldmap/${cancer}/${sex}/${cancer}_${sex}_${year}.csv`
+    return `/worldmap/${cancer}/${sex}/${cancer.replaceAll("_", "-")}_${sex}_${year}.csv`
 }
 
 // find largest polygon for multypoligon countries like russia
@@ -435,6 +439,8 @@ const clearSelectedCountry = () => {
     }
     d3.selectAll(".Country_map").classed("Focus", false);
     document.getElementById("country-box").style.display = "none";
+    document.getElementById("country-box").dataset.country = null;
+
 };
 const resetZoom = () => {
     const transform = d3.zoomIdentity
@@ -466,6 +472,8 @@ document.getElementById("resetZoomBtn").addEventListener("click", (e) => {
     resetZoom()
 });
 
+
+
 const showCountryBox = (countryName) => {
     const data = dataMap.get(countryName);
     if (data) {
@@ -474,9 +482,9 @@ const showCountryBox = (countryName) => {
         const year = data.year;
         const cancer = data.cause_name;
         const age = data.age_name;
-        const estimate = (+data[`${properties.view_type}_val`]).toFixed(2) || "N/A";
-        const upper = (+data[`${properties.view_type}_upper`]).toFixed(2) || "N/A";
-        const lower = (+data[`${properties.view_type}_lower`]).toFixed(2) || "N/A";
+        const estimate = (properties.view_type == "Percent" ? (+data[`${properties.view_type}_val`]) * 100 : (+data[`${properties.view_type}_val`])).toFixed(2) || "N/A";
+        const upper = (properties.view_type == "Percent" ? (+data[`${properties.view_type}_upper`]) * 100 : (+data[`${properties.view_type}_upper`])).toFixed(2) || "N/A";
+        const lower = (properties.view_type == "Percent" ? (+data[`${properties.view_type}_lower`]) * 100 : (+data[`${properties.view_type}_lower`])).toFixed(2) || "N/A";
         document.getElementById("selectedCountryName").textContent = name;
         document.getElementById("selectedYear").textContent = year;
         document.getElementById("lowerValue").textContent = lower;
@@ -488,8 +496,18 @@ const showCountryBox = (countryName) => {
         d3.selectAll(".Country_map").classed("Focus", false);
         d3.selectAll(`.Country_map[data-country="${countryName}"]`)
             .classed("Focus", true).raise();
+        document.getElementById("country-box").dataset.country = countryName;
+
     }
 
+
+}
+const changeCountryBoxData = () => {
+    const elementDisplay = document.getElementById("country-box").style.display;
+    console.log("change", elementDisplay)
+    if (elementDisplay == "block") {
+        showCountryBox(document.getElementById("country-box").dataset.country)
+    }
 
 }
 
@@ -506,6 +524,7 @@ document.getElementById("cancerSelect").addEventListener("change", (e) => {
     LocalstorageProperties.setPropreties(storageKey, { cause_name: value })
     //clearSelectedCountry()
     loadCSV()
+
     // handleChange("cancer", value);
 });
 
@@ -520,6 +539,7 @@ sexButtons.forEach(btn => {
         LocalstorageProperties.setPropreties(storageKey, { sex: value.toLowerCase() })
         //clearSelectedCountry()
         loadCSV()
+
         // handleChange("sex", value);
     });
 });
@@ -530,6 +550,7 @@ document.getElementById("yearSelect").addEventListener("change", (e) => {
     LocalstorageProperties.setPropreties(storageKey, { year: +value })
     //clearSelectedCountry()
     loadCSV()
+
     // handleChange("year", value);
 });
 
@@ -539,6 +560,7 @@ document.getElementById("ageSelect").addEventListener("change", (e) => {
     LocalstorageProperties.setPropreties(storageKey, { age_name: value })
     //clearSelectedCountry()
     updateMapFromCSV()
+    changeCountryBoxData()
     // handleChange("age_group", value);
 });
 // --- Sex toggle ---
@@ -551,6 +573,8 @@ displayButtons.forEach(btn => {
         const value = btn.dataset.value;
         LocalstorageProperties.setPropreties(storageKey, { view_type: value })
         UpdateView()
+        changeCountryBoxData()
+
         //clearSelectedCountry()
         // handleChange("sex", value);
     });
@@ -560,6 +584,7 @@ document.getElementById("countrySelect").addEventListener("change", (e) => {
     const value = e.target.value;
     zoomToACountry(value)
     showCountryBox(value)
+
     // handleChange("age_group", value);
 });
 document.getElementById("detailsNavBtn").addEventListener("click", () => {
