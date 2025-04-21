@@ -6,11 +6,92 @@
   <link rel="icon" type="image/jpeg" href="/cancer-logo.jpg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cancer Deaths Visualisation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f9f9f9;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .description {
+      max-width: 700px;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+      background-color: #fff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .description h2 {
+      margin-top: 0;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .button-group a {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      text-decoration: none;
+      background-color: #1976d2;
+      color: white;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    .button-group a:hover {
+      background-color: #1565c0;
+    }
+
+    footer {
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      color: #777;
+    }
+  </style>
 </head>
 
 <body>
-  <p>Open <a href="/pages/worldmap.html">Worldmap</a></p>
-  <p>Open <a href="/pages/country-stats.html">Country Specific Statitistics</a></p>
+  <header>
+    <h1>Cancer Deaths Visualisation</h1>
+    <p>Explore global and country-specific trends in cancer mortality</p>
+  </header>
+
+  <section class="description">
+    <h2>About the Project</h2>
+    <p><strong>Source:</strong> Global Burden of Disease Results - VizHub</p>
+    <p><strong>Metadata Information:</strong> The dataset is sourced from the Institute for Health Metrics and Evaluation (IHME), a well-recognized institution that collects health-related data from various sources.</p>
+    <p><strong>Summary:</strong> This visualization project helps users explore the global burden of cancer and reason about its progression over time. By analyzing detailed datasets on cancer-related deaths, it offers insights into how medical advancements, healthcare infrastructure, and other factors influence survival rates. The interactive World Map provides a comparative overview of cancer mortality rates across countries and regions. The Country-Specific Statistics page enables deeper analysis of individual nations, revealing trends, fluctuations, and localized challenges. This tool empowers researchers, healthcare professionals, and advocates to make data-driven decisions and push for impactful change in cancer prevention and treatment.</p>
+    <p><strong>Target Users:</strong></p>
+    <ul>
+      <li>Medical researchers studying cancer trends</li>
+      <li>Healthcare organizations and pharmaceutical companies</li>
+      <li>People advocating for more extensive cancer research</li>
+    </ul>
+  </section>
+
+  <div class="button-group">
+    <a href="/pages/worldmap.html">View World Map</a>
+    <a href="/pages/country-stats.html">Country Statistics</a>
+  </div>
 </body>
 
 </html>

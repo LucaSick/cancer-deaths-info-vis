@@ -324,8 +324,6 @@ function runLoadAndRender() {
     const ages = getSelected("ageFilter");
     const causes = getSelected("causeFilter");
 
-    console.log(parseInt(yearMinValue.textContent));
-
     loadAndRender(country, parseInt(yearMinValue.textContent), parseInt(yearMaxValue.textContent), ages, causes);
     drawMaleFemaleDeathsGraph(country, ages, causes, parseInt(yearMinValue.textContent), parseInt(yearMaxValue.textContent));
 }

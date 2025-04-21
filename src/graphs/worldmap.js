@@ -467,10 +467,8 @@ document.getElementById("resetZoomBtn").addEventListener("click", (e) => {
 });
 
 const showCountryBox = (countryName) => {
-    console.log(countryName)
     const data = dataMap.get(countryName);
     if (data) {
-        console.log(data)
         const properties = LocalstorageProperties.getProperties(storageKey)
         const name = data.location_name;
         const year = data.year;
@@ -488,7 +486,6 @@ const showCountryBox = (countryName) => {
         document.getElementById("agesData").textContent = age;
         document.getElementById("country-box").style.display = "block";
         d3.selectAll(".Country_map").classed("Focus", false);
-        console.log(d3.selectAll(`.Country_map[data-country="${countryName}"]`))
         d3.selectAll(`.Country_map[data-country="${countryName}"]`)
             .classed("Focus", true).raise();
     }
@@ -497,7 +494,6 @@ const showCountryBox = (countryName) => {
 }
 
 document.getElementById("map_container").addEventListener("click", (event) => {
-    console.log(event.target)
     if (!event.target.classList.contains("Country_map") && !event.target.classList.contains("dot_of_legend")) {
         clearSelectedCountry(); // Hide tooltip
     }
@@ -507,7 +503,6 @@ document.getElementById("map_container").addEventListener("click", (event) => {
 // --- Cancer type ---
 document.getElementById("cancerSelect").addEventListener("change", (e) => {
     const value = e.target.value;
-    console.log("Cancer type selected:", value);
     LocalstorageProperties.setPropreties(storageKey, { cause_name: value })
     //clearSelectedCountry()
     loadCSV()
@@ -522,7 +517,6 @@ sexButtons.forEach(btn => {
         sexButtons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         const value = btn.dataset.value;
-        console.log("Sex selected:", value);
         LocalstorageProperties.setPropreties(storageKey, { sex: value.toLowerCase() })
         //clearSelectedCountry()
         loadCSV()
@@ -533,7 +527,6 @@ sexButtons.forEach(btn => {
 // --- Year ---
 document.getElementById("yearSelect").addEventListener("change", (e) => {
     const value = e.target.value;
-    console.log("Year selected:", value);
     LocalstorageProperties.setPropreties(storageKey, { year: +value })
     //clearSelectedCountry()
     loadCSV()
@@ -543,7 +536,6 @@ document.getElementById("yearSelect").addEventListener("change", (e) => {
 // --- Age group ---
 document.getElementById("ageSelect").addEventListener("change", (e) => {
     const value = e.target.value;
-    console.log("Age group selected:", value);
     LocalstorageProperties.setPropreties(storageKey, { age_name: value })
     //clearSelectedCountry()
     updateMapFromCSV()
@@ -557,7 +549,6 @@ displayButtons.forEach(btn => {
         displayButtons.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         const value = btn.dataset.value;
-        console.log("Sex selected:", value);
         LocalstorageProperties.setPropreties(storageKey, { view_type: value })
         UpdateView()
         //clearSelectedCountry()
