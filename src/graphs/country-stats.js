@@ -60,6 +60,9 @@ const populateFilters = () => {
             [min, max] = [max, min];
         }
 
+        yearMinSlider.max = max;
+        yearMaxSlider.min = min;
+
         yearMinValue.textContent = min;
         yearMaxValue.textContent = max;
     };
