@@ -43,7 +43,26 @@ d3.json(GEOJSON).then(data => {
     console.error("Something went wrong loading the data: ", error);
 });
 
+const populateSelect = (id, options, current) => {
+    const select = document.getElementById(id);
+    select.innerHTML = // `<option value="">All</option>` +
+        options.map(opt => `<option ${opt == current ? "selected" : ""} value="${opt}">${opt || 'All'}</option>`).join("");
+};
 
+const populateCheckboxGroup = (id, options, current) => {
+    const container = document.getElementById(id);
+    container.innerHTML = options.map(opt => `
+      <label>
+          <input type="radio" name="${id}" ${opt === current ? "checked" : ""} value="${opt}" />
+          ${opt}
+      </label>
+  `).join("");
+};
+const populateCountry = (id, options, current) => {
+    const select = document.getElementById(id);
+    select.innerHTML = `<option value="">---</option>` +
+        options.map(opt => `<option ${opt.geo_location_name == current ? "selected" : ""} value="${opt.geo_location_name}">${opt.location_name || 'All'}</option>`).join("");
+};
 const populateFilters = () => {
     const properties = LocalstorageProperties.getProperties(storageKey)
     const defaultValueCancer = properties.cause_name;
@@ -52,57 +71,14 @@ const populateFilters = () => {
     const defaultValueSex = properties.sex;
     const defaultValueDisplay = properties.view_type;
 
-    //Cancer
-    const cancerSelect = document.getElementById("cancerSelect");
-    const cancerOptionElements = FilterValues.cause_names.map(value => {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        if (value === defaultValueCancer) {
-            option.selected = true;
-        }
-        return option;
-    });
-    cancerSelect.append(...cancerOptionElements);
+    const yearRange = document.getElementById("yearRange");
+    yearRange.value = defaultValueYear;
+    populateSelect("yearSelect", FilterValues.years, properties.year)
+    populateCheckboxGroup("ageFilter", FilterValues.ages, defaultValueAge)
+    populateCheckboxGroup("causeFilter", FilterValues.cause_names, defaultValueCancer)
+    populateCheckboxGroup("sexFilter", FilterValues.sex, defaultValueSex)
+    populateCheckboxGroup("displayFilter", FilterValues.display, defaultValueDisplay)
 
-    //Year
-    const yearSelect = document.getElementById("yearSelect");
-    const yearOptionElements = FilterValues.years.map(value => {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        if (value === defaultValueYear) {
-            option.selected = true;
-        }
-        return option;
-    });
-    yearSelect.append(...yearOptionElements);
-
-    //Ages
-    const ageSelect = document.getElementById("ageSelect");
-    const ageOptionElements = FilterValues.ages.map(value => {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        if (value === defaultValueAge) {
-            option.selected = true;
-        }
-        return option;
-    });
-    ageSelect.append(...ageOptionElements);
-    const countrySelect = document.getElementById("countrySelect");
-    const countryOptionElements = geoData.features.sort((a, b) =>
-        a.properties.name.localeCompare(b.properties.name)
-    ).map(value => {
-        const option = document.createElement("option");
-        option.value = value.properties.name;
-        option.textContent = value.properties.name;
-        return option;
-    });
-    countrySelect.append(...countryOptionElements);
-
-    document.querySelector(`#displayToggle .filter-btn[data-value="${defaultValueDisplay}"]`)?.classList.add('active');
-    document.querySelector(`#sexToggle .filter-btn[data-value="${defaultValueSex}"]`)?.classList.add('active');
 }
 
 //Function to draw the map
@@ -180,6 +156,10 @@ const loadCSV = () => {
 const updateMapFromCSV = () => {
     const filtered = filterCSVData(rawCSVData)
     dataMap = createCSVMapCountryMap(filtered)
+    populateCountry("countryFilter", Array.from(dataMap.values()).sort((a, b) =>
+        a.location_name.localeCompare(b.location_name)
+    ), null)
+    console.log(Array.from(dataMap.values()))
     UpdateView()
 }
 
@@ -188,7 +168,7 @@ const UpdateView = () => {
     const properties = LocalstorageProperties.getProperties(storageKey)
     createTitle(properties)
     const metric = `${properties.view_type}_val`;
-    const allValues = Array.from(dataMap.values()).map(d => +d[metric])
+    const allValues = Array.from(dataMap.values()).map(d => properties.view_type == "Percent" ? +d[metric] * 100 : +d[metric])
     const populationDomain = d3.extent(allValues)
     const colorScale = d3.scaleSequential(d3.interpolateViridis).domain(populationDomain)
     d3.selectAll(".Country_map")
@@ -373,7 +353,7 @@ const filterCSVData = (data) => {
 //Create the path to the right csv file
 const getCSVName = (properties) => {
     let cancer = properties.cause_name?.replaceAll(" ", "_").replaceAll("/", "-").toLowerCase()
-    let sex = properties.sex
+    let sex = properties.sex.toLowerCase()
     let year = properties.year
     return `/worldmap/${cancer}/${sex}/${cancer.replaceAll("_", "-")}_${sex}_${year}.csv`
 }
@@ -435,7 +415,7 @@ const clearSelectedCountry = () => {
     if (selectedCountry) {
         selectedCountry = null;
         d3.selectAll(".Country_map").classed("Focus", false);
-        document.getElementById("countrySelect").value = "";
+        document.getElementById("countryFilter").value = "";
     }
     d3.selectAll(".Country_map").classed("Focus", false);
     document.getElementById("country-box").style.display = "none";
@@ -467,7 +447,7 @@ window.addEventListener("resize", () => {
 
 //Country events
 
-document.getElementById("resetZoomBtn").addEventListener("click", (e) => {
+document.getElementById("resetZoom").addEventListener("click", (e) => {
     clearSelectedCountry()
     resetZoom()
 });
@@ -504,7 +484,7 @@ const showCountryBox = (countryName) => {
 }
 const changeCountryBoxData = () => {
     const elementDisplay = document.getElementById("country-box").style.display;
-    console.log("change", elementDisplay)
+    //console.log("change", elementDisplay)
     if (elementDisplay == "block") {
         showCountryBox(document.getElementById("country-box").dataset.country)
     }
@@ -519,7 +499,7 @@ document.getElementById("map_container").addEventListener("click", (event) => {
 //Filter events
 
 // --- Cancer type ---
-document.getElementById("cancerSelect").addEventListener("change", (e) => {
+document.getElementById("causeFilter").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { cause_name: value })
     //clearSelectedCountry()
@@ -528,26 +508,23 @@ document.getElementById("cancerSelect").addEventListener("change", (e) => {
     // handleChange("cancer", value);
 });
 
-// --- Sex toggle ---
-const sexButtons = document.querySelectorAll("#sexToggle .filter-btn");
-
-sexButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-        sexButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        const value = btn.dataset.value;
-        LocalstorageProperties.setPropreties(storageKey, { sex: value.toLowerCase() })
-        //clearSelectedCountry()
-        loadCSV()
-
-        // handleChange("sex", value);
-    });
-});
 
 // --- Year ---
 document.getElementById("yearSelect").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { year: +value })
+    const yearRange = document.getElementById("yearRange");
+    yearRange.value = value;
+    //clearSelectedCountry()
+    loadCSV()
+
+    // handleChange("year", value);
+});
+document.getElementById("yearRange").addEventListener("change", (e) => {
+    const value = e.target.value;
+    LocalstorageProperties.setPropreties(storageKey, { year: +value })
+    const yearSelect = document.getElementById("yearSelect");
+    yearSelect.value = value;
     //clearSelectedCountry()
     loadCSV()
 
@@ -555,7 +532,7 @@ document.getElementById("yearSelect").addEventListener("change", (e) => {
 });
 
 // --- Age group ---
-document.getElementById("ageSelect").addEventListener("change", (e) => {
+document.getElementById("ageFilter").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { age_name: value })
     //clearSelectedCountry()
@@ -564,7 +541,23 @@ document.getElementById("ageSelect").addEventListener("change", (e) => {
     // handleChange("age_group", value);
 });
 // --- Sex toggle ---
-const displayButtons = document.querySelectorAll("#displayToggle .filter-btn");
+document.getElementById("sexFilter").addEventListener("change", (e) => {
+    const value = e.target.value;
+    LocalstorageProperties.setPropreties(storageKey, { sex: value })
+    //clearSelectedCountry()
+    loadCSV()
+});
+
+//display
+
+document.getElementById("displayFilter").addEventListener("change", (e) => {
+    const value = e.target.value;
+
+    LocalstorageProperties.setPropreties(storageKey, { view_type: value })
+    UpdateView()
+    changeCountryBoxData()
+});
+/*const displayButtons = document.querySelectorAll("#displayToggle .filter-btn");
 
 displayButtons.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -578,9 +571,9 @@ displayButtons.forEach(btn => {
         //clearSelectedCountry()
         // handleChange("sex", value);
     });
-});
+});*/
 //Country
-document.getElementById("countrySelect").addEventListener("change", (e) => {
+document.getElementById("countryFilter").addEventListener("change", (e) => {
     const value = e.target.value;
     zoomToACountry(value)
     showCountryBox(value)

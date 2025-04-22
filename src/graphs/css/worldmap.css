@@ -14,13 +14,21 @@ body {
 #view_container {
     flex: 1;
     display: flex;
+    min-height: 0;
 }
 
 #filter_container {
-    padding: 2px;
-    width: 25%;
-    height: 100%;
-    border-right: 1px solid #ddd;
+    padding: 20px;
+    max-width: 30%;
+    height: 94%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: sans-serif;
+    background-color: #ffffff;
+    color: #333;
+    font-family: sans-serif;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 #world_container {
@@ -165,4 +173,77 @@ svg {
     background-color: #0d6efd;
     color: white;
     border-color: #0d6efd;
+}
+
+.filter-group {
+    margin-bottom: 16px;
+}
+
+.filter-group label,
+.filter-group span {
+    display: inline-block;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #222;
+}
+
+.range-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.range-wrapper input[type="range"] {
+    flex: 1;
+    min-width: 120px;
+}
+
+select {
+    font-size: 16px;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.checkbox-group label {
+    font-weight: normal;
+    background: #e0e0e0;
+    color: #111;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.checkbox-group label:hover {
+    background: #d0d0d0;
+}
+
+#countryFilter {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    color: #222;
+}
+
+#resetZoom {
+    padding: 10px 18px;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+
+}
+
+#resetZoom:hover {
+    background-color: #155ab6;
 }
