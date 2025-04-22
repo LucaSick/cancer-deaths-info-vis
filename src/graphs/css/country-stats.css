@@ -11,7 +11,7 @@ body {
 }
 
 .filter-panel {
-    max-width: 600px;
+    max-width: 100%;
     margin-bottom: 20px;
     padding: 16px;
     border: 1px solid #ccc;
@@ -19,6 +19,8 @@ body {
     font-family: sans-serif;
     background-color: #ffffff;
     color: #333;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 .filter-group {
@@ -99,4 +101,27 @@ body {
     pointer-events: none;
     display: none;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: 0.4s;
+}
+  
+.active, .accordion:hover {
+    background-color: #ccc;
+}
+  
+.panel {
+    padding: 18px;
+    background-color: white;
+    display: none;
+    overflow: hidden;
 }

@@ -3,6 +3,22 @@ import '../style.css'
 import FilterValues from "../Utils/filterValues";
 import createLoadNavbar from '../Utils/createNavbar';
 
+// accordion code
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.display === "block") {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+    }
+  });
+}
+
 createLoadNavbar("Details")
 const populateFilters = () => {
     const yearOptions = FilterValues.years;
@@ -155,8 +171,8 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
     d3.select("#app").select("svg").remove();
 
     const margin = { top: 40, right: 100, bottom: 40, left: 60 };
-    const width = 800 - margin.left - margin.right;
-    const height = 600 - margin.top - margin.bottom;
+    const width = 700 - margin.left - margin.right;
+    const height = 450 - margin.top - margin.bottom;
 
     const svg = d3.select("#app")
         .append("svg")
