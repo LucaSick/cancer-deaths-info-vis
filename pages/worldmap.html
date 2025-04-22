@@ -12,59 +12,35 @@
     <nav id="navbar"></nav>
     <div id="view_container">
         <div id="filter_container">
-            <div class="filter_group">
-                <label>
-                    <span class="filter_label">Cancer type:</span>
-                    <select id="cancerSelect">
-                    </select>
-                </label>
+            <div class="filter-group">
+                <label>Sex:</label>
+                <div id="sexFilter" class="checkbox-group"></div>
             </div>
-            <div class="filter_group">
-                <label>
-                    <span class="filter_label">Sex:</span>
-                    <div class="btnFilterGroup" id="sexToggle">
-                        <button class="filter-btn" data-value="both">Both</button>
-                        <button class="filter-btn" data-value="male">Male</button>
-                        <button class="filter-btn" data-value="female">Female</button>
-                    </div>
-                </label>
+            <div class="filter-group">
+                <label>Display value:</label>
+                <div id="displayFilter" class="checkbox-group"></div>
             </div>
-            <div class="filter_group">
-                <label>
-                    <span class="filter_label">Year:</span>
+            <div class="filter-group">
+                <span>Year:</span>
+                <div class="range-wrapper">
                     <select id="yearSelect">
-                    </select>
-                </label>
+                        <input type="range" id="yearRange" min="1980" max="2021" step="1">
+                </div>
             </div>
-            <div class="filter_group">
-                <label>
-                    <span class="filter_label">Age:</span>
-                    <select id="ageSelect">
-                    </select>
-                </label>
+            <div class="filter-group">
+                <label for="countryFilter">Location:</label><br>
+                <select id="countryFilter" style="width: 100%; padding: 4px;"></select>
             </div>
-            <div class="filter_group">
-                <label>
-                    <span class="filter_label">Display type:</span>
-                    <div class="btnFilterGroup" id="displayToggle">
-                        <button class="filter-btn" data-value="Rate">Rate</button>
-                        <button class="filter-btn" data-value="Number">Number</button>
-                        <button class="filter-btn" data-value="Percent">Percent</button>
+            <div class="filter-group">
+                <label>Age Group:</label>
+                <div id="ageFilter" class="checkbox-group"></div>
+            </div>
+            <div class="filter-group">
+                <label>Causes Group:</label>
+                <div id="causeFilter" class="checkbox-group"></div>
+            </div>
 
-                    </div>
-                </label>
-            </div>
-            <div class="filter_group">
-                <label>
-                    <span class="filter_label">Country:</span>
-                    <select id="countrySelect">
-                        <option value="">---</option>
-                    </select>
-                </label>
-            </div>
-            <div class="filter_group">
-                <button id="resetZoomBtn">Reset Zoom</button>
-            </div>
+            <button id="resetZoom">Reset zoom</button>
         </div>
         <div id="world_container">
             <div id="map_container">
