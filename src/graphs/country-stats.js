@@ -190,11 +190,7 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
         .style("border-radius", "4px")
         .style("pointer-events", "none");
 
-    let fileName = "/male-female-deaths/male-females-deaths.csv";
-
-    if (causes.length) {
-        fileName = `/male-female-deaths/male-females-deaths-causes.csv`
-    }
+    const fileName = `/male-female-deaths/male-females-deaths-${locationName}.csv`
 
     d3.csv(fileName, d => ({
         sex_name: d.sex_name,
@@ -206,23 +202,12 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
     })).then(rawData => {
         let filteredData = rawData;
 
-        if (locationName) {
-            filteredData = filteredData.filter(d => d.location_name === locationName);
-        }
+        filteredData = filteredData.filter(d =>
+            (!ages.length || ages.includes(d.age_name)) &&
+            (!causes.length || causes.includes(d.cause_name)) &&
+            (!yearMax || !yearMin || (d.year <= yearMax && d.year >= yearMin))
+        );
 
-        if (ages.length) {
-            filteredData = filteredData.filter(d => ages.includes(d.age_name));
-        }
-
-        if (causes.length) {
-            filteredData = filteredData.filter(d => causes.includes(d.cause_name));
-        }
-
-        if (yearMax && yearMin) {
-            filteredData = filteredData.filter(d => d.year <= yearMax && d.year >= yearMin);
-        }
-
-        // Step 1: Aggregate by sex_name and year
         const groupedData = Array.from(
             d3.rollup(
                 filteredData,
@@ -258,7 +243,6 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
             values: totalByYear
         });
 
-        // Step 2: Flatten all data to compute x/y scales
         const allPoints = groupedData.flatMap(d => d.values);
 
         const xScale = d3.scaleLinear()
@@ -330,11 +314,6 @@ const getSelected = (id) => {
     return Array.from(document.querySelectorAll(`#${id} input[type="checkbox"]:checked`))
         .map(checkbox => checkbox.value);
 };
-
-// const getSelectedCauses = () => {
-//   return Array.from(document.querySelectorAll('#causeFilter input[type="checkbox"]:checked'))
-//       .map(checkbox => checkbox.value);
-// };
 
 function runLoadAndRender() {
     const country = document.getElementById("countryFilter").value;
