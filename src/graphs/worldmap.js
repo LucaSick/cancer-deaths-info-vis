@@ -29,7 +29,11 @@ const legendLabel = {
     "Percent": "Percent of all possible deaths",
     "Number": "Number of deaths"
 }
-
+const metric_product = {
+    "Rate": 1,
+    "Percent": 100,
+    "Number": 1
+}
 createLoadNavbar("Worldmap")
 //GET the GEOJSONDATA
 d3.json(GEOJSON).then(data => {
@@ -168,7 +172,7 @@ const UpdateView = () => {
     const properties = LocalstorageProperties.getProperties(storageKey)
     createTitle(properties)
     const metric = `${properties.view_type}_val`;
-    const allValues = Array.from(dataMap.values()).map(d => properties.view_type == "Percent" ? +d[metric] * 100 : +d[metric])
+    const allValues = Array.from(dataMap.values()).map(d => +d[metric] * +metric_product[properties.view_type])
     const populationDomain = d3.extent(allValues)
     const colorScale = d3.scaleSequential(d3.interpolateViridis).domain(populationDomain)
     d3.selectAll(".Country_map")
@@ -176,7 +180,8 @@ const UpdateView = () => {
         .duration(500)
         .style("fill", d => {
             const data = dataMap.get(d.properties.name);
-            return data ? colorScale(data[metric]) : "#ccc";
+            console.log(data)
+            return data ? colorScale(+data[metric] * +metric_product[properties.view_type]) : "#ccc";
         });
     d3.selectAll(".Country_map")
         .select("title").remove(); // remove old titles if they exist
@@ -249,15 +254,15 @@ const createTitle = (properties) => {
     lower.append("tspan")
         .attr("dy", 0)
         .style("font-weight", "normal")
-        .text((properties.view_type == "Percent" ? (+globaleData[`${properties.view_type}_lower`]) * 100 : (+globaleData[`${properties.view_type}_lower`])).toFixed(2));
+        .text((+globaleData[`${properties.view_type}_lower`] * +metric_product[properties.view_type]).toFixed(2));
     estimate.append("tspan")
         .attr("dy", 0)
         .style("font-weight", "normal")
-        .text((properties.view_type == "Percent" ? (+globaleData[`${properties.view_type}_val`]) * 100 : (+globaleData[`${properties.view_type}_val`])).toFixed(2));
+        .text((+globaleData[`${properties.view_type}_val`] * +metric_product[properties.view_type]).toFixed(2));
     upper.append("tspan")
         .attr("dy", 0)
         .style("font-weight", "normal")
-        .text((properties.view_type == "Percent" ? (+globaleData[`${properties.view_type}_upper`]) * 100 : (+globaleData[`${properties.view_type}_upper`])).toFixed(2));
+        .text((+globaleData[`${properties.view_type}_upper`] * +metric_product[properties.view_type]).toFixed(2));
 }
 const createLegend = (populationDomain, colorScale, metric, properties) => {
     legendGroup.selectAll("*").remove();
@@ -313,10 +318,10 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
     legendGroup.selectAll(".legend-dot")
         .data(countryData)
         .join("circle")
-        .attr("cx", d => xAxisScale(d[metric]))
+        .attr("cx", d => xAxisScale(+d[metric] * +metric_product[properties.view_type]))
         .attr("cy", 0)
         .attr("r", 5)
-        .style("fill", d => colorScale(d[metric]))
+        .style("fill", d => colorScale(+d[metric] * +metric_product[properties.view_type]))
         //.style("opacity", 0.5)
         .style("stroke", "#000")
         .style("stroke-width", 0.5)
@@ -328,9 +333,9 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
         .append("title")
         .text(d => {
             const name = d.location_name;
-            const estimate = (properties.view_type == "Percent" ? (+d[metric]) * 100 : (+d[metric])).toFixed(2) || "N/A";
-            const upper = (properties.view_type == "Percent" ? (+d[`${properties.view_type}_upper`]) * 100 : (+d[`${properties.view_type}_upper`])).toFixed(2) || "N/A";
-            const lower = (properties.view_type == "Percent" ? (+d[`${properties.view_type}_lower`]) * 100 : (+d[`${properties.view_type}_lower`])).toFixed(2) || "N/A";
+            const estimate = (+d[metric] * +metric_product[properties.view_type]).toFixed(2) || "N/A";
+            const upper = (+d[`${properties.view_type}_upper`] * +metric_product[properties.view_type]).toFixed(2) || "N/A";
+            const lower = (+d[`${properties.view_type}_lower`] * +metric_product[properties.view_type]).toFixed(2) || "N/A";
             return `${name}\nLower: ${lower}\nEstimate: ${estimate}\nUpper: ${upper}`;
         });
 }
@@ -462,9 +467,9 @@ const showCountryBox = (countryName) => {
         const year = data.year;
         const cancer = data.cause_name;
         const age = data.age_name;
-        const estimate = (properties.view_type == "Percent" ? (+data[`${properties.view_type}_val`]) * 100 : (+data[`${properties.view_type}_val`])).toFixed(2) || "N/A";
-        const upper = (properties.view_type == "Percent" ? (+data[`${properties.view_type}_upper`]) * 100 : (+data[`${properties.view_type}_upper`])).toFixed(2) || "N/A";
-        const lower = (properties.view_type == "Percent" ? (+data[`${properties.view_type}_lower`]) * 100 : (+data[`${properties.view_type}_lower`])).toFixed(2) || "N/A";
+        const estimate = (+data[`${properties.view_type}_val`] * +metric_product[properties.view_type]).toFixed(2) || "N/A";
+        const upper = (+data[`${properties.view_type}_upper`] * +metric_product[properties.view_type]).toFixed(2) || "N/A";
+        const lower = (+data[`${properties.view_type}_lower`] * +metric_product[properties.view_type]).toFixed(2) || "N/A";
         document.getElementById("selectedCountryName").textContent = name;
         document.getElementById("selectedYear").textContent = year;
         document.getElementById("lowerValue").textContent = lower;
