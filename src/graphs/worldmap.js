@@ -4,28 +4,36 @@ import './css/worldmap.css'
 import LocalstorageProperties from '../Utils/localstorageProperties';
 import FilterValues from '../Utils/filterValues';
 import createLoadNavbar from '../Utils/createNavbar';
-//Geodata generated from https://geojson-maps.kyd.au/ also take a look at TopoJSON 
-// tutorial followed https://technology.amis.nl/frontend/web-html5-css3/create-interactive-world-map-to-visualize-country-data/
-//https://technology.amis.nl/frontend/world-map-data-visualization-with-d3-js-geojson-and-svg-zooming-and-panning-and-dragging/
-//And https://www.d3indepth.com/geographic/
+
+//Geodata generated from https://geojson-maps.kyd.au/  
+//tutorial followed https://technology.amis.nl/frontend/web-html5-css3/create-interactive-world-map-to-visualize-country-data/
+//                  https://technology.amis.nl/frontend/world-map-data-visualization-with-d3-js-geojson-and-svg-zooming-and-panning-and-dragging/
+// And              https://www.d3indepth.com/geographic/
 
 
+//Global variable used during the world map
 let geoData;
-const GEOJSON = "/GEOJSON_medium_stripped.json"
-const storageKey = "worlmap_filter"
-let rawCSVData = [];
+const GEOJSON = "/GEOJSON_medium_stripped.json" //Path to GEOJSON data
+const storageKey = "worlmap_filter" // Key to save filters into local storage
+let rawCSVData = []; // Place to store the raw data returned from a CSV file
+
+// Some styling settings
 const padding = 20;
 const legendHeight = 100
 const titleHeight = 50
 const globalHeight = 20
+
+// Variables used by the world map to create the different elements
 let zoom
 let dataMap = new Map()
 let worldmap, titleGroup, worldmapGroup, globalGroup, legendGroup, projection, geoGenerator, width, height
 let mapHeight
 let selectedCountry
-let globaleData = {}
+let globaleData = {} //used to store the data of the global data from csv that is not really part of the map
+
+// Some lirary to show the right labels and calculation factors
 const legendLabel = {
-    "Rate": "Rate per 100 000",
+    "Rate": "Rate per 100 000 deaths",
     "Percent": "Percent of all possible deaths",
     "Number": "Number of deaths"
 }
@@ -34,25 +42,35 @@ const metric_product = {
     "Percent": 100,
     "Number": 1
 }
+
+//Create the navigation bar making sure to specify that the worldmap is selected.
 createLoadNavbar("Worldmap")
+
 //GET the GEOJSONDATA
 d3.json(GEOJSON).then(data => {
     geoData = data;
+
+    //Fill the filters with the right data
     populateFilters()
 
+    //Create the data map that uses the geojson data
     CreateMapSVG();
+
+    //Fetch the right CSV file and add the data to the worldmap
     loadCSV();
 
 }).catch((error) => {
     console.error("Something went wrong loading the data: ", error);
 });
 
+//Populate the select filters
 const populateSelect = (id, options, current) => {
     const select = document.getElementById(id);
     select.innerHTML = // `<option value="">All</option>` +
         options.map(opt => `<option ${opt == current ? "selected" : ""} value="${opt}">${opt || 'All'}</option>`).join("");
 };
 
+//Populate the checkbox filters
 const populateCheckboxGroup = (id, options, current) => {
     const container = document.getElementById(id);
     container.innerHTML = options.map(opt => `
@@ -62,13 +80,18 @@ const populateCheckboxGroup = (id, options, current) => {
       </label>
   `).join("");
 };
+
+// Populate the country dropdown 
 const populateCountry = (id, options, current) => {
     const select = document.getElementById(id);
     select.innerHTML = `<option value="">---</option>` +
         options.map(opt => `<option ${opt.geo_location_name == current ? "selected" : ""} value="${opt.geo_location_name}">${opt.location_name || 'All'}</option>`).join("");
 };
+
+// Add all data to the filters
 const populateFilters = () => {
-    const properties = LocalstorageProperties.getProperties(storageKey)
+
+    const properties = LocalstorageProperties.getProperties(storageKey) //Get the values to filter on from local storage
     const defaultValueCancer = properties.cause_name;
     const defaultValueYear = properties.year;
     const defaultValueAge = properties.age_name;
@@ -115,17 +138,19 @@ const CreateMapSVG = () => {
         .attr("id", "map_legend")
         .attr("transform", `translate(${padding}, ${height - legendHeight})`);
 
+    // Used to eneable zoom functionality
     zoom = d3.zoom()
-        .scaleExtent([1, 15])
-        //.translateExtent([[0, 0], [width, height]])
+        .scaleExtent([1, 15]) // adds minimum zoom of 1 and maximum zoom of 15
         .on("zoom", (event) => {
-            worldmapGroup.attr("transform", event.transform);
-            //worldmapGroup.attr("transform", event.transform);
+            worldmapGroup.attr("transform", event.transform); // makes the enire worlmap group zoom
         });
 
-    worldmap.call(zoom);
+    //attache the zoom behavior to the worldmap element.
+    worldmap.call(zoom).on("dblclick.zoom", null);
     redrawMap()
 }
+
+// Dynamically redraw the map
 const redrawMap = () => {
     worldmap.select("path").remove()
     projection = d3.geoEquirectangular().fitExtent(
@@ -141,14 +166,19 @@ const redrawMap = () => {
         .on("click", (event, d) => {
             showCountryBox(d.properties.name)
         })
+        .on("dblclick", (event, d) => {
+            zoomToACountry(d.properties.name)
+            showCountryBox(d.properties.name)
+        })
     //.classed("Monaco", d => d.properties.name === "Monaco")
     UpdateView()
 }
+
+
 //Load the correct CSV file
 const loadCSV = () => {
     const properties = LocalstorageProperties.getProperties(storageKey)
     const path = getCSVName(properties)
-    console.log(path)
     d3.csv(path).then(csvData => {
         rawCSVData = csvData;
         updateMapFromCSV()
@@ -156,6 +186,7 @@ const loadCSV = () => {
     }
     );
 }
+
 //Update the dataMap after CSV load
 const updateMapFromCSV = () => {
     const filtered = filterCSVData(rawCSVData)
@@ -163,11 +194,10 @@ const updateMapFromCSV = () => {
     populateCountry("countryFilter", Array.from(dataMap.values()).sort((a, b) =>
         a.location_name.localeCompare(b.location_name)
     ), null)
-    console.log(Array.from(dataMap.values()))
     UpdateView()
 }
 
-//add the country colors etc.
+//add the country colors, values etc.
 const UpdateView = () => {
     const properties = LocalstorageProperties.getProperties(storageKey)
     createTitle(properties)
@@ -212,8 +242,8 @@ const createTitle = (properties) => {
     globalGroup.selectAll("*").remove();
 
     titleGroup.append("text")
-        .attr("x", width / 2) // center it
-        .attr("y", 0) // some spacing below the axis
+        .attr("x", width / 2)
+        .attr("y", 0)
         .attr("text-anchor", "middle")
         .attr("font-size", "25px")
         .attr("fill", "#000")
@@ -225,7 +255,7 @@ const createTitle = (properties) => {
         .attr("text-anchor", "middle")
         .attr("font-size", "14px")
         .attr("fill", "#555")
-        .text(`Ages: ${properties.age_name}`);
+        .text(`Ages: ${properties.age_name} (${properties.sex})`);
 
     const lower = globalGroup.append("text")
         .attr("x", padding)
@@ -264,6 +294,8 @@ const createTitle = (properties) => {
         .style("font-weight", "normal")
         .text((+globaleData[`${properties.view_type}_upper`] * +metric_product[properties.view_type]).toFixed(2));
 }
+
+// Create the legenda
 const createLegend = (populationDomain, colorScale, metric, properties) => {
     legendGroup.selectAll("*").remove();
     const mapGradient = legendGroup
@@ -274,6 +306,7 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
         .attr("y1", "0%")
         .attr("x2", "100%")
         .attr("y2", "0%");
+
     const steps = 10;
     const step = (populationDomain[1] - populationDomain[0]) / steps;
     for (let i = 0; i <= steps; i++) {
@@ -307,7 +340,7 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
 
     legendGroup.append("text")
         .attr("x", rectWidth / 2) // center it
-        .attr("y", legendHeight + 50) // some spacing below the axis
+        .attr("y", legendHeight + 50) // spacing below the axis
         .attr("text-anchor", "middle")
         .attr("font-size", "15px")
         .attr("fill", "#000")
@@ -347,7 +380,7 @@ const createCSVMapCountryMap = (data) => {
     )
 }
 
-//filter the CSV data
+//filter the CSV data on the filter values retrieved from local storage
 const filterCSVData = (data) => {
     const properties = LocalstorageProperties.getProperties(storageKey)
     const globalName = "Global";
@@ -363,7 +396,7 @@ const getCSVName = (properties) => {
     return `/worldmap/${cancer}/${sex}/${cancer.replaceAll("_", "-")}_${sex}_${year}.csv`
 }
 
-// find largest polygon for multypoligon countries like russia
+// find largest polygon for multypoligon countries like russia to be able to zoom to the largest part of the country because not all countries are on single plygon in de GEOJSON data
 const getLargestPolygon = (countryName) => {
     const countryFeature = geoData.features.find(d => d.properties.name === countryName);
     if (countryFeature.geometry.type !== "MultiPolygon") {
@@ -371,11 +404,11 @@ const getLargestPolygon = (countryName) => {
     }
     const largestPolygon = countryFeature.geometry.coordinates.reduce((acc, coords) => {
         const area = d3.geoArea({ type: "Polygon", coordinates: coords });
-
         return area > acc.area
             ? { coords, area }
             : acc;
     }, { coords: null, area: -Infinity });
+
     return {
         type: "Feature",
         properties: countryFeature.properties,
@@ -386,6 +419,8 @@ const getLargestPolygon = (countryName) => {
     };
 
 }
+
+// This zooms in on a country tutorial used https://technology.amis.nl/frontend/world-map-data-visualization-with-d3-js-geojson-and-svg-zooming-and-panning-and-dragging/
 const zoomToACountry = (countryName) => {
     selectedCountry = countryName
     const countryFeature = getLargestPolygon(countryName);
@@ -399,6 +434,7 @@ const zoomToACountry = (countryName) => {
         properties: {},
         geometry: countryFeature.geometry
     });
+
     const dx = x1 - x0;
     const dy = y1 - y0;
     const x = (x0 + x1) / 2;
@@ -416,6 +452,8 @@ const zoomToACountry = (countryName) => {
             transform
         );
 }
+
+// Reset the selected country
 const clearSelectedCountry = () => {
     if (selectedCountry) {
         selectedCountry = null;
@@ -427,6 +465,8 @@ const clearSelectedCountry = () => {
     document.getElementById("country-box").dataset.country = null;
 
 };
+
+// Zoom back to the standar zoom
 const resetZoom = () => {
     const transform = d3.zoomIdentity
         .translate(0, 0)
@@ -437,9 +477,8 @@ const resetZoom = () => {
 }
 
 
-//Resizing the window
+//Resizing the window, making sure the map is dispayed correctly when the window size changes
 let resizeTimeout;
-
 window.addEventListener("resize", () => {
     clearSelectedCountry()
     clearTimeout(resizeTimeout);
@@ -450,15 +489,14 @@ window.addEventListener("resize", () => {
     }, 200);
 });
 
-//Country events
-
+//Reset the the zoom to standard value when clicking the reste zoom button
 document.getElementById("resetZoom").addEventListener("click", (e) => {
     clearSelectedCountry()
     resetZoom()
 });
 
 
-
+// Show the country box popup with information about the selected country
 const showCountryBox = (countryName) => {
     const data = dataMap.get(countryName);
     if (data) {
@@ -477,7 +515,7 @@ const showCountryBox = (countryName) => {
         document.getElementById("UpperValue").textContent = upper;
         document.getElementById("typeData").textContent = cancer;
         document.getElementById("agesData").textContent = age;
-        //show navigation button only when detail data is present
+        //show navigation button only when details data is present
         if (FilterValues.countries.includes(name)) {
             document.getElementById("detailsNavBtn").style.display = "block";
         } else {
@@ -493,30 +531,31 @@ const showCountryBox = (countryName) => {
 
 
 }
+
+//Show the country box data when filter is changed
 const changeCountryBoxData = () => {
     const elementDisplay = document.getElementById("country-box").style.display;
-    //console.log("change", elementDisplay)
     if (elementDisplay == "block") {
         showCountryBox(document.getElementById("country-box").dataset.country)
     }
 
 }
 
+// When the user does ot click on a country clear the selectd country
 document.getElementById("map_container").addEventListener("click", (event) => {
     if (!event.target.classList.contains("Country_map") && !event.target.classList.contains("dot_of_legend")) {
         clearSelectedCountry(); // Hide tooltip
     }
 });
-//Filter events
 
+
+
+// Event listeners to change data
 // --- Cancer type ---
 document.getElementById("causeFilter").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { cause_name: value })
-    //clearSelectedCountry()
     loadCSV()
-
-    // handleChange("cancer", value);
 });
 
 
@@ -526,44 +565,33 @@ document.getElementById("yearSelect").addEventListener("change", (e) => {
     LocalstorageProperties.setPropreties(storageKey, { year: +value })
     const yearRange = document.getElementById("yearRange");
     yearRange.value = value;
-    //clearSelectedCountry()
     loadCSV()
-
-    // handleChange("year", value);
 });
 document.getElementById("yearRange").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { year: +value })
     const yearSelect = document.getElementById("yearSelect");
     yearSelect.value = value;
-    //clearSelectedCountry()
     loadCSV()
-
-    // handleChange("year", value);
 });
 
 // --- Age group ---
 document.getElementById("ageFilter").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { age_name: value })
-    //clearSelectedCountry()
     updateMapFromCSV()
     changeCountryBoxData()
-    // handleChange("age_group", value);
 });
 // --- Sex toggle ---
 document.getElementById("sexFilter").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { sex: value })
-    //clearSelectedCountry()
     loadCSV()
 });
 
-//display
-
+//display type Rate, Number or Percent
 document.getElementById("displayFilter").addEventListener("change", (e) => {
     const value = e.target.value;
-
     LocalstorageProperties.setPropreties(storageKey, { view_type: value })
     UpdateView()
     changeCountryBoxData()
@@ -583,18 +611,21 @@ displayButtons.forEach(btn => {
         // handleChange("sex", value);
     });
 });*/
+
 //Country
 document.getElementById("countryFilter").addEventListener("change", (e) => {
     const value = e.target.value;
     zoomToACountry(value)
     showCountryBox(value)
-
-    // handleChange("age_group", value);
 });
+
+// Go to selected country details
 document.getElementById("detailsNavBtn").addEventListener("click", () => {
     const country = document.getElementById("selectedCountryName").textContent;
     window.location.href = "/pages/country-stats.html?country=" + encodeURIComponent(country);
 });
+
+// close selected country
 document.getElementById("countryClose").addEventListener("click", () => {
     clearSelectedCountry();
 });

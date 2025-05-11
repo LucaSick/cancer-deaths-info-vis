@@ -1,3 +1,4 @@
+// Get the navbar html file and insert it in the right element
 const createLoadNavbar = (page) => {
     fetch("/navbar.html")
         .then(res => res.text())
