@@ -477,6 +477,12 @@ const showCountryBox = (countryName) => {
         document.getElementById("UpperValue").textContent = upper;
         document.getElementById("typeData").textContent = cancer;
         document.getElementById("agesData").textContent = age;
+        //show navigation button only when detail data is present
+        if (FilterValues.countries.includes(name)) {
+            document.getElementById("detailsNavBtn").style.display = "block";
+        } else {
+            document.getElementById("detailsNavBtn").style.display = "none";
+        }
         document.getElementById("country-box").style.display = "block";
         d3.selectAll(".Country_map").classed("Focus", false);
         d3.selectAll(`.Country_map[data-country="${countryName}"]`)
