@@ -338,6 +338,64 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
         .attr("transform", `translate(0, ${10 + legendHeight})`)
         .call(xAxis);
 
+    // Zoom Buttons
+    const buttonSize = 24;
+    const buttonSpacing = 8;
+    const buttonY = legendHeight + 35;
+    const buttonFill = "#1a73e8";
+
+    const zoomGroupBtns = legendGroup.append("g")
+        .attr("class", "zoom-group_buttons");
+
+    // Zoom Out Button
+    const zoomOut = zoomGroupBtns.append("g")
+        .attr("class", "zoom-out")
+        .attr("cursor", "pointer")
+        .on("click", () => {
+            zoom.scaleBy(worldmap.transition().duration(500), 0.8);
+        });
+
+    zoomOut.append("rect")
+        .attr("x", buttonSpacing)
+        .attr("y", buttonY)
+        .attr("width", buttonSize)
+        .attr("height", buttonSize)
+        .attr("fill", buttonFill)
+        .attr("rx", 4);
+
+    zoomOut.append("text")
+        .attr("x", buttonSpacing + buttonSize / 2)
+        .attr("y", buttonY + buttonSize / 2 + 5)
+        .attr("text-anchor", "middle")
+        .attr("fill", "white")
+        .attr("font-size", "16px")
+        .text("−");
+
+    //Zoomin button
+
+    const zoomIn = zoomGroupBtns.append("g")
+        .attr("class", "zoom-in")
+        .attr("cursor", "pointer")
+        .on("click", () => {
+            zoom.scaleBy(worldmap.transition().duration(500), 1.2);
+        });
+    zoomIn.append("rect")
+        .attr("x", buttonSpacing * 2 + buttonSize)
+        .attr("y", buttonY)
+        .attr("width", buttonSize)
+        .attr("height", buttonSize)
+        .attr("fill", buttonFill)
+        .attr("rx", 4);
+
+    zoomIn.append("text")
+        .attr("x", buttonSpacing * 2 + buttonSize + buttonSize / 2)
+        .attr("y", buttonY + buttonSize / 2 + 5)
+        .attr("text-anchor", "middle")
+        .attr("fill", "white")
+        .attr("font-size", "16px")
+        .text("+");
+
+    // Text legenda
     legendGroup.append("text")
         .attr("x", rectWidth / 2) // center it
         .attr("y", legendHeight + 50) // spacing below the axis
@@ -346,6 +404,8 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
         .attr("fill", "#000")
         .style("font-weight", "bold")
         .text(legendLabel[properties.view_type]);
+
+
 
     const countryData = Array.from(dataMap.values())
     legendGroup.selectAll(".legend-dot")
