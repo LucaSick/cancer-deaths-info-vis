@@ -17,7 +17,6 @@ const GEOJSON = "/GEOJSON_medium_stripped.json" //Path to GEOJSON data
 const storageKey = "worlmap_filter" // Key to save filters into local storage
 let rawCSVData = []; // Place to store the raw data returned from a CSV file
 let rangeData = []; // place to get range Data
-let currentYear
 //Specify if the range accross years need to be used to color the map
 const useRangeFile = true
 // Some styling settings
@@ -179,7 +178,7 @@ const redrawMap = () => {
 }
 
 
-//Load the correct CSV file
+//Load the correct CSV file for both data and range
 const loadCSV = (loadData, getRange) => {
     document.getElementById("overlay").style.display = "flex";
     const properties = LocalstorageProperties.getProperties(storageKey)
@@ -232,6 +231,7 @@ const UpdateView = () => {
     createTitle(properties)
     const metric = `${properties.view_type}_val`;
     let populationDomain = []
+    //Use the rangefile csv to uniformly add ranges throughout time
     if (useRangeFile && rangeData.length != 0) {
         const rangeObject = rangeData.find(item => item['age_name'] == properties.age_name)
         console.log("rangeObject", rangeObject)
