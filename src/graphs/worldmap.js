@@ -16,7 +16,10 @@ let geoData;
 const GEOJSON = "/GEOJSON_medium_stripped.json" //Path to GEOJSON data
 const storageKey = "worlmap_filter" // Key to save filters into local storage
 let rawCSVData = []; // Place to store the raw data returned from a CSV file
-
+let rangeData = []; // place to get range Data
+let currentYear
+//Specify if the range accross years need to be used to color the map
+const useRangeFile = true
 // Some styling settings
 const padding = 20;
 const legendHeight = 100
@@ -57,7 +60,7 @@ d3.json(GEOJSON).then(data => {
     CreateMapSVG();
 
     //Fetch the right CSV file and add the data to the worldmap
-    loadCSV();
+    loadCSV(true);
 
 }).catch((error) => {
     console.error("Something went wrong loading the data: ", error);
@@ -97,6 +100,7 @@ const populateFilters = () => {
     const defaultValueAge = properties.age_name;
     const defaultValueSex = properties.sex;
     const defaultValueDisplay = properties.view_type;
+    currentYear = defaultValueYear;
 
     const yearRange = document.getElementById("yearRange");
     yearRange.value = defaultValueYear;
@@ -176,15 +180,40 @@ const redrawMap = () => {
 
 
 //Load the correct CSV file
-const loadCSV = () => {
+const loadCSV = (loadData, getRange) => {
+    document.getElementById("overlay").style.display = "flex";
     const properties = LocalstorageProperties.getProperties(storageKey)
-    const path = getCSVName(properties)
-    d3.csv(path).then(csvData => {
-        rawCSVData = csvData;
+    const promiseList = [];
+    if (loadData) {
+        const path = getCSVName(properties, false)
+        promiseList.push(d3.csv(path));
+    }
+
+    if (getRange && useRangeFile) {
+        const rangePath = getCSVName(properties, true)
+        promiseList.push(d3.csv(rangePath));
+    }
+
+    Promise.all(promiseList).then(results => {
+        console.log("results", results)
+        if (loadData) {
+            rawCSVData = results.shift();
+        }
+        if (getRange && useRangeFile) {
+            rangeData = results.shift();
+        }
+
         updateMapFromCSV()
         changeCountryBoxData()
-    }
-    );
+
+    });
+
+    /* d3.csv(path).then(csvData => {
+         rawCSVData = csvData;
+         updateMapFromCSV()
+         changeCountryBoxData()
+     }
+     );*/
 }
 
 //Update the dataMap after CSV load
@@ -202,15 +231,27 @@ const UpdateView = () => {
     const properties = LocalstorageProperties.getProperties(storageKey)
     createTitle(properties)
     const metric = `${properties.view_type}_val`;
-    const allValues = Array.from(dataMap.values()).map(d => +d[metric] * +metric_product[properties.view_type])
-    const populationDomain = d3.extent(allValues)
+    let populationDomain = []
+    if (useRangeFile && rangeData.length != 0) {
+        const rangeObject = rangeData.find(item => item['age_name'] == properties.age_name)
+        console.log("rangeObject", rangeObject)
+        populationDomain = [rangeObject[`val_min_${properties.view_type}`] * +metric_product[properties.view_type], rangeObject[`val_max_${properties.view_type}`] * +metric_product[properties.view_type]]
+        console.log("populationDomain", populationDomain);
+    } else {
+        const allValues = Array.from(dataMap.values()).map(d => +d[metric] * +metric_product[properties.view_type])
+        populationDomain = d3.extent(allValues)
+    }
+    /*const [min, max] = FilterValues.minMaxDisplayValues[properties.view_type];
+    const metric_product_factor = +metric_product[properties.view_type];
+    const populationDomain = [(min * metric_product_factor), (max * metric_product_factor)]*/
     const colorScale = d3.scaleSequential(d3.interpolateViridis).domain(populationDomain)
+    document.getElementById("overlay").style.display = "none";
     d3.selectAll(".Country_map")
         .transition()
         .duration(500)
         .style("fill", d => {
             const data = dataMap.get(d.properties.name);
-            console.log(data)
+            //console.log(data)
             return data ? colorScale(+data[metric] * +metric_product[properties.view_type]) : "#ccc";
         });
     d3.selectAll(".Country_map")
@@ -360,7 +401,7 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
         .attr("y", buttonY)
         .attr("width", buttonSize)
         .attr("height", buttonSize)
-        .attr("fill", buttonFill)
+        .attr("class", "ZoomBtns")
         .attr("rx", 4);
 
     zoomOut.append("text")
@@ -384,7 +425,7 @@ const createLegend = (populationDomain, colorScale, metric, properties) => {
         .attr("y", buttonY)
         .attr("width", buttonSize)
         .attr("height", buttonSize)
-        .attr("fill", buttonFill)
+        .attr("class", "ZoomBtns")
         .attr("rx", 4);
 
     zoomIn.append("text")
@@ -445,14 +486,18 @@ const filterCSVData = (data) => {
     const properties = LocalstorageProperties.getProperties(storageKey)
     const globalName = "Global";
     globaleData = data.find(d => d["location_name"] === globalName)
+    console.log("global", globaleData)
     return data.filter(d => d["location_name"] !== globalName && d["age_name"] === properties.age_name && d["cause_name"] === properties.cause_name && +d["year"] === properties.year)
 }
 
 //Create the path to the right csv file
-const getCSVName = (properties) => {
+const getCSVName = (properties, rangeFile) => {
     let cancer = properties.cause_name?.replaceAll(" ", "_").replaceAll("/", "-").toLowerCase()
     let sex = properties.sex.toLowerCase()
     let year = properties.year
+    if (rangeFile) {
+        return `/worldmap/${cancer}/${sex}/range.csv`
+    }
     return `/worldmap/${cancer}/${sex}/${cancer.replaceAll("_", "-")}_${sex}_${year}.csv`
 }
 
@@ -615,7 +660,7 @@ document.getElementById("map_container").addEventListener("click", (event) => {
 document.getElementById("causeFilter").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { cause_name: value })
-    loadCSV()
+    loadCSV(true, true)
 });
 
 
@@ -625,28 +670,28 @@ document.getElementById("yearSelect").addEventListener("change", (e) => {
     LocalstorageProperties.setPropreties(storageKey, { year: +value })
     const yearRange = document.getElementById("yearRange");
     yearRange.value = value;
-    loadCSV()
+    loadCSV(true, false)
 });
 document.getElementById("yearRange").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { year: +value })
     const yearSelect = document.getElementById("yearSelect");
     yearSelect.value = value;
-    loadCSV()
+    loadCSV(true, false)
 });
 
 // --- Age group ---
 document.getElementById("ageFilter").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { age_name: value })
-    updateMapFromCSV()
+    loadCSV(false, true)
     changeCountryBoxData()
 });
 // --- Sex toggle ---
 document.getElementById("sexFilter").addEventListener("change", (e) => {
     const value = e.target.value;
     LocalstorageProperties.setPropreties(storageKey, { sex: value })
-    loadCSV()
+    loadCSV(true, true)
 });
 
 //display type Rate, Number or Percent
