@@ -188,6 +188,11 @@ svg {
     flex-wrap: wrap;
 }
 
+.rangeSlider {
+    display: flex;
+    flex: 1;
+}
+
 .range-wrapper input[type="range"] {
     flex: 1;
     min-width: 120px;
@@ -288,7 +293,7 @@ select {
     transition: 0.4s;
 }
 
-.active,
+.accordion.active,
 .accordion:hover {
     background-color: #ccc;
 }

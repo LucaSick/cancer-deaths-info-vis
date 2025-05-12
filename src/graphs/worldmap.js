@@ -678,6 +678,8 @@ document.getElementById("causeFilter").addEventListener("change", (e) => {
 });
 
 
+const minYear = 1980;
+const MaxYear = 2021;
 // --- Year ---
 document.getElementById("yearSelect").addEventListener("change", (e) => {
     const value = e.target.value;
@@ -693,6 +695,35 @@ document.getElementById("yearRange").addEventListener("change", (e) => {
     yearSelect.value = value;
     loadCSV(true, false)
 });
+
+document.getElementById("leftBtnRange").addEventListener("click", (e) => {
+    const currentYear = LocalstorageProperties.getProperties(storageKey).year;
+    if (currentYear > minYear) {
+        const newYear = (+currentYear - 1)
+        LocalstorageProperties.setPropreties(storageKey, { year: newYear })
+        const yearSelect = document.getElementById("yearSelect");
+        yearSelect.value = newYear;
+        const yearRange = document.getElementById("yearRange");
+        yearRange.value = newYear;
+        loadCSV(true, false)
+    }
+
+});
+
+document.getElementById("rightBtnRange").addEventListener("click", (e) => {
+    const currentYear = LocalstorageProperties.getProperties(storageKey).year;
+    if (currentYear < MaxYear) {
+        const newYear = (+currentYear + 1)
+        LocalstorageProperties.setPropreties(storageKey, { year: newYear })
+        const yearSelect = document.getElementById("yearSelect");
+        yearSelect.value = newYear;
+        const yearRange = document.getElementById("yearRange");
+        yearRange.value = newYear;
+        loadCSV(true, false)
+    }
+
+});
+
 
 // --- Age group ---
 document.getElementById("ageFilter").addEventListener("change", (e) => {

@@ -24,8 +24,12 @@
             <div class="filter-group">
                 <span>Year:</span>
                 <div class="range-wrapper">
-                    <select id="yearSelect">
-                        <input type="range" id="yearRange" min="1980" max="2021" step="1">
+                    <select id="yearSelect"></select>
+                    <div class="rangeSlider">
+                        <button id="leftBtnRange">&#9664;</button>
+                        <input type="range" id="yearRange" min="1980" max="2021" step="1" />
+                        <button id="rightBtnRange" onclick="changeYear(1)">&#9654;</button>
+                    </div>
                 </div>
             </div>
             <div class="filter-group">
