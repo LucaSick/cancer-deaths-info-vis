@@ -486,7 +486,6 @@ const filterCSVData = (data) => {
     const properties = LocalstorageProperties.getProperties(storageKey)
     const globalName = "Global";
     globaleData = data.find(d => d["location_name"] === globalName)
-    console.log("global", globaleData)
     return data.filter(d => d["location_name"] !== globalName && d["age_name"] === properties.age_name && d["cause_name"] === properties.cause_name && +d["year"] === properties.year)
 }
 
