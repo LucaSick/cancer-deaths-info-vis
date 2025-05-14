@@ -3,6 +3,22 @@ import '../style.css'
 import FilterValues from "../Utils/filterValues";
 import createLoadNavbar from '../Utils/createNavbar';
 
+// accordion code
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.display === "block") {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+    }
+  });
+}
+
 createLoadNavbar("Details")
 const populateFilters = () => {
     const yearOptions = FilterValues.years;
@@ -12,7 +28,7 @@ const populateFilters = () => {
 
     const populateSelect = (id, options) => {
         const select = document.getElementById(id);
-        select.innerHTML = // `<option value="">All</option>` +
+        select.innerHTML =
             options.map(opt => `<option value="${opt}">${opt || 'All'}</option>`).join("");
     };
 
@@ -26,7 +42,6 @@ const populateFilters = () => {
       `).join("");
     };
 
-    // populateSelect("yearFilter", yearOptions);
     populateSelect("countryFilter", locationOptions);
     const urlparams = new URLSearchParams(window.location.search);
     if (urlparams.has("country")) {
@@ -55,7 +70,6 @@ const populateFilters = () => {
         let min = parseInt(yearMinSlider.value);
         let max = parseInt(yearMaxSlider.value);
 
-        // Prevent overlap
         if (min > max) {
             [min, max] = [max, min];
         }
@@ -77,30 +91,27 @@ populateFilters()
 
 const loadAndRender = async (country, yearMin, yearMax, ages, causes) => {
     const data = await d3.csv(`/country-stats/country-stats-${country}.csv`, d3.autoType);
-    // Optional filter
+
     const filtered = data.filter(d => {
         return (d.year <= yearMax && d.year >= yearMin)
             && (ages.length === 0 || ages.includes(d.age_name))
             && (causes.length === 0 || causes.includes(d.cause_name));
     });
 
-    // Group by cause_name and sum val
     const grouped = d3.rollups(
         filtered,
         v => d3.sum(v, d => d.val),
         d => d.cause_name
     );
 
-    // Sort (optional)
     grouped.sort((a, b) => b[1] - a[1]);
 
-    // Draw
     renderChart(grouped);
 };
 
 function renderChart(data) {
     const svg = d3.select("#chart");
-    svg.selectAll("*").remove(); // Clear previous chart
+    svg.selectAll("*").remove();
 
     const width = +svg.attr("width");
     const height = +svg.attr("height");
@@ -155,17 +166,16 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
     d3.select("#app").select("svg").remove();
 
     const margin = { top: 40, right: 100, bottom: 40, left: 60 };
-    const width = 800 - margin.left - margin.right;
-    const height = 600 - margin.top - margin.bottom;
+    const width = 700 - margin.left - margin.right;
+    const height = 450 - margin.top - margin.bottom;
 
     const svg = d3.select("#app")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+        .attr("transform", `translate(${margin.left},${margin.top})`)
 
-    // Tooltip div
     const tooltip = d3.select("#tooltip")
         .style("position", "absolute")
         .style("background", "#fff")
@@ -174,11 +184,7 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
         .style("border-radius", "4px")
         .style("pointer-events", "none");
 
-    let fileName = "/male-female-deaths/male-females-deaths.csv";
-
-    if (causes.length) {
-        fileName = `/male-female-deaths/male-females-deaths-causes.csv`
-    }
+    const fileName = `/male-female-deaths/male-females-deaths-${locationName}.csv`
 
     d3.csv(fileName, d => ({
         sex_name: d.sex_name,
@@ -190,23 +196,12 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
     })).then(rawData => {
         let filteredData = rawData;
 
-        if (locationName) {
-            filteredData = filteredData.filter(d => d.location_name === locationName);
-        }
+        filteredData = filteredData.filter(d =>
+            (!ages.length || ages.includes(d.age_name)) &&
+            (!causes.length || causes.includes(d.cause_name)) &&
+            (!yearMax || !yearMin || (d.year <= yearMax && d.year >= yearMin))
+        );
 
-        if (ages.length) {
-            filteredData = filteredData.filter(d => ages.includes(d.age_name));
-        }
-
-        if (causes.length) {
-            filteredData = filteredData.filter(d => causes.includes(d.cause_name));
-        }
-
-        if (yearMax && yearMin) {
-            filteredData = filteredData.filter(d => d.year <= yearMax && d.year >= yearMin);
-        }
-
-        // Step 1: Aggregate by sex_name and year
         const groupedData = Array.from(
             d3.rollup(
                 filteredData,
@@ -222,7 +217,7 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
                     val
                 })).sort((a, b) => a.year - b.year)
             })
-        );
+        )
 
         const totalByYear = Array.from(
             d3.rollup(
@@ -242,7 +237,6 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
             values: totalByYear
         });
 
-        // Step 2: Flatten all data to compute x/y scales
         const allPoints = groupedData.flatMap(d => d.values);
 
         const xScale = d3.scaleLinear()
@@ -252,11 +246,10 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
         const yScale = d3.scaleLinear()
             .domain([0, d3.max(allPoints, d => d.val)])
             .nice()
-            .range([height, 0]);
+            .range([height, 0])
 
         const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-        // Axes
         svg.append("g")
             .attr("transform", `translate(0,${height})`)
             .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
@@ -264,22 +257,18 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
         svg.append("g")
             .call(d3.axisLeft(yScale));
 
-        // Line generator
         const line = d3.line()
             .x(d => xScale(d.year))
             .y(d => yScale(d.val));
 
-        // Step 3: Render lines, dots, and labels
         for (const { sex_name, values } of groupedData) {
-            // Line path
             svg.append("path")
                 .datum(values)
                 .attr("fill", "none")
                 .attr("stroke", color(sex_name))
                 .attr("stroke-width", 2)
-                .attr("d", line);
+                .attr("d", line)
 
-            // Last label
             svg.append("text")
                 .datum(values[values.length - 1])
                 .attr("x", d => xScale(d.year) + 5)
@@ -288,7 +277,6 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
                 .style("fill", color(sex_name))
                 .attr("font-size", "12px");
 
-            // Dots
             svg.selectAll(`.dot-${sex_name}`)
                 .data(values)
                 .enter()
@@ -298,7 +286,7 @@ const drawMaleFemaleDeathsGraph = (locationName, ages, causes, yearMin, yearMax)
                 .attr("r", 4)
                 .attr("fill", color(sex_name))
                 .on("mouseover", (event, d) => {
-                    tooltip.transition().duration(100).style("display", "block");
+                    tooltip.transition().duration(100).style("display", "block")
                     tooltip.html(`<strong>${d.sex_name}</strong><br>Year: ${d.year}<br>Deaths: ${d.val.toFixed(2)}`)
                         .style("left", `${event.pageX + 10}px`)
                         .style("top", `${event.pageY - 28}px`);
@@ -315,15 +303,10 @@ const getSelected = (id) => {
         .map(checkbox => checkbox.value);
 };
 
-// const getSelectedCauses = () => {
-//   return Array.from(document.querySelectorAll('#causeFilter input[type="checkbox"]:checked'))
-//       .map(checkbox => checkbox.value);
-// };
-
 function runLoadAndRender() {
     const country = document.getElementById("countryFilter").value;
     const yearMinValue = document.getElementById("yearMinValue");
-    const yearMaxValue = document.getElementById("yearMaxValue");
+    const yearMaxValue = document.getElementById("yearMaxValue")
     const ages = getSelected("ageFilter");
     const causes = getSelected("causeFilter");
 
@@ -335,4 +318,4 @@ document.getElementById("apply-filters").addEventListener("click", () => {
     runLoadAndRender()
 });
 
-runLoadAndRender()
+runLoadAndRender();

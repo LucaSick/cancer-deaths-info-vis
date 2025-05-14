@@ -12,42 +12,52 @@
 <body>
     <nav id="navbar"></nav>
     <h1>Country Specific Statistics</h1>
-    <div style="display: flex; flex-direction: row; background-color: #ffffff;">
+    <div style="display: flex; flex-direction: column; background-color: #ffffff;">
         <div>
             <div class="filter-panel">
-                <div class="filter-group">
-                    <span>Year range:</span>
-                    <div class="range-wrapper">
-                        <span>From <strong id="yearMinValue">1980</strong></span>
-                        <input type="range" id="yearRangeMin" min="1980" max="2021" step="1">
-                        <span>To <strong id="yearMaxValue">2021</strong></span>
-                        <input type="range" id="yearRangeMax" min="1980" max="2021" step="1">
+                <div style="display: flex; flex-direction: row; justify-content: space-between;">
+                    <div class="filter-group">
+                        <span>Year range:</span>
+                        <div class="range-wrapper">
+                            <span>From <strong id="yearMinValue">1980</strong></span>
+                            <input type="range" id="yearRangeMin" min="1980" max="2021" step="1">
+                            <span>To <strong id="yearMaxValue">2021</strong></span>
+                            <input type="range" id="yearRangeMax" min="1980" max="2021" step="1">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="countryFilter">Location:</label><br>
+                        <select id="countryFilter" style="width: 40vw; padding: 4px;"></select>
                     </div>
                 </div>
 
                 <div class="filter-group">
-                    <label for="countryFilter">Location:</label><br>
-                    <select id="countryFilter" style="width: 100%; padding: 4px;"></select>
+                    <button class="accordion">Age Group:</button>
+                    <div class="panel">
+                        <div id="ageFilter" class="checkbox-group"></div>
+                    </div>
                 </div>
 
                 <div class="filter-group">
-                    <label>Age Group:</label>
-                    <div id="ageFilter" class="checkbox-group"></div>
-                </div>
-
-                <div class="filter-group">
-                    <label>Causes Group:</label>
-                    <div id="causeFilter" class="checkbox-group"></div>
+                    <button class="accordion">Causes Group:</button>
+                    <div class="panel">
+                        <div id="causeFilter" class="checkbox-group"></div>
+                    </div>
                 </div>
 
                 <button id="apply-filters">Load & Render</button>
             </div>
         </div>
-        <div style="padding: 10px; background-color: #ffffff;">
-            <h3 style="padding-bottom: 0%; margin-bottom: 0%;">Most deadly cancer types</h3>
-            <svg id="chart" width="800" height="600"></svg>
-            <h3 style="padding-bottom: 0%; margin-bottom: 0%;">Total cancer deaths per year</h3>
-            <div id="app"></div>
+        <div style="background-color: #ffffff; display: flex; flex-direction: row; padding-left: 5px;">
+            <div>
+                <h3 style="padding-bottom: 0%; margin-bottom: 0%;">Most deadly cancer types</h3>
+                <svg id="chart" width="700" height="600"></svg>
+            </div>
+            <div>
+                <h3 style="padding-bottom: 0%; margin-bottom: 0%;">Total cancer deaths per year</h3>
+                <div id="app"></div>
+            </div>
         </div>
         <div id="tooltip" style="
                 position: absolute;
