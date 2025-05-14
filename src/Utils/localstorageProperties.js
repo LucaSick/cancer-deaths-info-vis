@@ -3,11 +3,12 @@ const defaultProperties = {
         age_name: "All ages",
         cause_name: "Neoplasms",
         year: 1980,
-        sex: "both",
+        sex: "Both",
         view_type: "Rate"
     }
 };
 
+// Current filters are put in local storage so they can resume where they left of when they close the map or go to the details
 const LocalstorageProperties = {
     getProperties(storageKey) {
         if (!localStorage.getItem(storageKey)) {
